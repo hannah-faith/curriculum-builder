@@ -42,10 +42,6 @@ body {
   background-color: var(--hw-neutral) !important;
   border-color: var(--hw-white) !important;
 }
-/* White border around file input wrapper */
-.file-input-wrapper {
-  border: 1px solid var(--hw-white) !important;
-}
 .header-title {
   font-size: 1.25rem;
   font-weight: bold;
@@ -64,8 +60,9 @@ body {
   border-radius: 4px;
   padding: 4px 8px;
   margin-left: 0.5rem;
-  background: transparent;
+  background-color: var(--hw-primary-light);
 }
+
 .file-input-wrapper input[type="file"] {
   border: none;
   padding: 0;

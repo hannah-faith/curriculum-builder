@@ -454,7 +454,9 @@ function renderSectionGroups() {
   renderActivities();
 }
 
-    document.getElementById('add-vocab-button').addEventListener('click',()=>{course.vocabulary.push('');refreshVocabList();});document.getElementById('save-course-details').addEventListener('click',()=>console.log('Course details:',course));document.getElementById('new-course-button').addEventListener('click',()=>{course={id:genUUID(),name:'',title:'',description:'',mediaUrl:'',mediaType:'image',language:'CoBlocks',vocabulary:[],rubric:[],section_groups:[]};initCourseDetails();renderRubric();renderSectionGroups();});document.getElementById('add-rubric-item').addEventListener('click',()=>{course.rubric.push({id:genUUID(),type:'',title:'',requirements:[]});renderRubric();});document.getElementById('save-rubric').addEventListener('click',()=>console.log('Rubric:',course.rubric));document.getElementById('add-section-group').addEventListener('click',()=>{course.section_groups.push({id:genUUID(),title:'',sections:[]});renderSectionGroups();});document.getElementById('save-section-groups').addEventListener('click',()=>console.log('Section Groups:',course.section_groups));
+document.getElementById('add-vocab-button').addEventListener('click',()=>{course.vocabulary.push('');refreshVocabList();});
+document.getElementById('add-rubric-item').addEventListener('click',()=>{course.rubric.push({id:genUUID(),type:'',title:'',requirements:[]});renderRubric();});
+document.getElementById('add-section-group').addEventListener('click',()=>{course.section_groups.push({id:genUUID(),title:'',sections:[]});renderSectionGroups();});
 
     // Prepare a deep copy of the course with media blocks nested under "media" and snake_case keys
     function prepareExportData(course) {
@@ -1260,9 +1262,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
 // Global expand/collapse handler for all card headers
 document.body.addEventListener('click', e => {
   if (e.target.classList.contains('card-header')) {
+    const card = e.target.parentElement;
     const panel = e.target.nextElementSibling;
     if (panel && panel.classList.contains('card-body')) {
       panel.classList.toggle('hidden');
+      // toggle open and active styles
+      card.classList.toggle('open');
+      card.classList.toggle('active-card');
     }
   }
 });
