@@ -1,6 +1,7 @@
 /* Hello World Brand Palette */
 :root {
   --hw-primary: #5C71F2;
+  --hw-primary-light: #7A8DF7;
   --hw-teal:    #66D8E1;
   --hw-purple:  #B0B0F9;
   --hw-black:   #242424;
@@ -87,9 +88,9 @@ body {
 button {
   padding: 6px 12px;
   margin: 2px;
-  border: 1px solid var(--hw-primary);
+  border: 1px solid var(--hw-primary-light);
   border-radius: 4px;
-  background-color: var(--hw-primary);
+  background-color: var(--hw-primary-light);
   color: var(--hw-white);
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
@@ -108,8 +109,8 @@ button:disabled {
 
 /* Card headers with brand color */
 .card-header {
-  background-color: var(--hw-primary);
-  color: var(--hw-white);
+  /* background-color: var(--hw-primary); */
+  color: var(--hw-primary);
   padding: 6px;
 }
 
