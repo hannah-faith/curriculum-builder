@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Curriculum Editor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header -->
+    <header class="fixed-header">
+  <div class="header-title">Curriculum Builder</div>
+  <div class="header-controls">
+    <button id="export-json-header" type="button">Export JSON</button>
+    <div class="file-input-wrapper">
+      <input type="file" id="import-json-header" accept="application/json">
+    </div>
+  </div>
+</header>
+<main class="main-content">
+
+    <!-- Course Details -->
+  <div class="card" id="course-details-card">
+    <div class="card-header">Course Details</div>
+    <div class="card-body">
+      <input type="hidden" id="course-id">
+      <div class="field-group">
+        <label for="course-name">Internal Name</label>
+        <input type="text" id="course-name">
+      </div>
+      <div class="field-group">
+        <label for="course-title">Display Title</label>
+        <input type="text" id="course-title">
+      </div>
+      <div class="field-group">
+        <label for="course-description">Description</label>
+        <div id="course-description" contenteditable="true" class="rich-text-editor"></div>
+      </div>
+      <div class="field-group">
+        <label for="media-url">Thumbnail/Preview URL</label>
+        <input type="url" id="media-url">
+      </div>
+      <div class="field-group">
+        <label for="language">Language</label>
+        <select id="language">
+          <option value="CoBlocks">CoBlocks</option>
+          <option value="Python">Python</option>
+          <option value="HTML/CSS/JS">HTML/CSS/JS</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Vocabulary</label>
+        <div id="vocabulary-list" class="tag-list"></div>
+        <button id="add-vocab-button" type="button">+ Add Tag</button>
+      </div>
+      <button id="save-course-details" type="button">Save Course Details</button>
+      <button id="new-course-button" type="button">Add New Course</button>
+    </div>
+  </div>
+
+  <!-- Rubric Section -->
+  <div class="card" id="rubric-card">
+    <div class="card-header">Rubric</div>
+    <div class="card-body">
+      <div id="rubric-list"></div>
+      <button id="add-rubric-item" type="button">+ Add Rubric Item</button>
+      <button id="save-rubric" type="button">Save Rubric</button>
+    </div>
+  </div>
+
+  <!-- Section Groups & Sections -->
+  <div class="card" id="section-groups-card">
+    <div class="card-header">Section Groups</div>
+    <div class="card-body">
+      <div id="section-groups-list"></div>
+      <button id="add-section-group" type="button">+ Add Section Group</button>
+      <button id="save-section-groups" type="button">Save Section Groups</button>
+    </div>
+  </div>
+
+  <!-- Scoring Section -->
+  <div class="card" id="scoring-card">
+    <div class="card-header">Scoring</div>
+    <div class="card-body">
+      <div id="criteria-list"></div>
+      <button id="add-criterion" type="button">+ Add Criterion</button>
+    </div>
+  </div>
+
+  <!-- Activities Mapping -->
+  <div class="card" id="activities-card">
+    <div class="card-header">Activities Mapping</div>
+    <div class="card-body">
+      <div id="activities-list"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</main>
+</body>
+</html>
