@@ -487,3 +487,44 @@ body {
 .active-card {
   border: 2px solid var(--hw-teal);
 }
+
+/* drag handle style */
+.drag-handle {
+  cursor: grab;
+  color: var(--hw-primary);
+  padding: 0 6px;
+  font-size: 1.2em;
+  user-select: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Highlight each requirement block and set grid for draggable area */
+.requirements-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  column-gap: 8px;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+/* Ensure the text input spans the middle column */
+.requirements-list li > input {
+  grid-column: 2;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Position delete button in the last column */
+.requirements-list li > .delete-req {
+  grid-column: 3;
+  margin-left: 4px;
+}
+
+/* Make audio and URL field-groups span full width below */
+.requirements-list li > .field-group {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+}

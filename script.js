@@ -3,6 +3,7 @@ let course = {
       language: 'CoBlocks', vocabulary: [], rubric: [], section_groups: [],
       scoring: { criteria: [] }, activities: {}
     };
+let rubricDrake;
 
     // Helper: human-readable checkpoint options
     function getCheckpointOptions() {
@@ -130,24 +131,20 @@ let course = {
         ul.className='requirements-list';
         item.requirements.forEach((req,j)=>{
           const li=document.createElement('li');
-          ['↑','↓'].forEach(dir=>{
-            const btn=document.createElement('button');
-            btn.textContent=dir;
-            btn.className='move-btn';
-            btn.addEventListener('click',()=>{
-              const arr=item.requirements;
-              if(dir==='↑'&&j>0)[arr[j-1],arr[j]]=[arr[j],arr[j-1]];
-              if(dir==='↓'&&j<arr.length-1)[arr[j],arr[j+1]]=[arr[j+1],arr[j]];
-              renderRubric();
-            });
-            li.append(btn);
-          });
+          // drag handle for requirement
+          const handle = document.createElement('span');
+          handle.className = 'drag-handle';
+          handle.textContent = '⋮⋮';
+          li.append(handle);
+          // tag for ordering
+          li.dataset.reqId = req.id;
           const inputR = document.createElement('input');
           inputR.value = req.text;
           inputR.addEventListener('input', () => {
             req.text = inputR.value;
           });
           const del=document.createElement('button');
+          del.classList.add('delete-req');
           del.textContent='×';
           del.addEventListener('click',()=>{
             item.requirements.splice(j,1);
@@ -160,30 +157,29 @@ let course = {
           fgAudio.className = 'field-group';
           const chkAudio = document.createElement('input');
           chkAudio.type = 'checkbox';
-          chkAudio.checked = !!req.audio;
+          chkAudio.checked = !!req.audioEnabled;
           chkAudio.addEventListener('change', () => {
-            if (chkAudio.checked) {
-              req.audio = req.audio || '';
-            } else {
-              delete req.audio;
-            }
+            // toggle audio enabled flag
+            req.audioEnabled = chkAudio.checked;
+            // remove URL when disabled
+            if (!req.audioEnabled) delete req.audio;
             renderRubric();
           });
           const lblAudio = document.createElement('label');
           lblAudio.textContent = 'Include Audio';
-          lblAudio.prepend(chkAudio);
+          lblAudio.append(chkAudio);
           fgAudio.append(lblAudio);
           li.append(fgAudio);
 
-          // Show URL field when audio is enabled
-          if (req.audio !== undefined) {
+          // Show URL field only when audio is enabled
+          if (req.audioEnabled) {
             const fgUrl = document.createElement('div');
             fgUrl.className = 'field-group';
             const labelUrl = document.createElement('label');
             labelUrl.textContent = 'Audio URL';
             const inputUrl = document.createElement('input');
             inputUrl.type = 'text';
-            inputUrl.value = req.audio;
+            inputUrl.value = req.audio || '';
             inputUrl.addEventListener('input', () => req.audio = inputUrl.value);
             fgUrl.append(labelUrl, inputUrl);
             li.append(fgUrl);
@@ -214,6 +210,26 @@ let course = {
         body.append(ctrl);
         card.append(header,body);
         list.append(card);
+      });
+      // initialize dragula for rubric requirements
+      if (rubricDrake) rubricDrake.destroy();
+      const reqContainers = Array.from(document.querySelectorAll('.requirements-list'));
+      rubricDrake = window.dragula(reqContainers, {
+        moves: (el, source, handle) => handle.classList.contains('drag-handle')
+      })
+      .on('drop', (el, target) => {
+        const rubricIdx = Array.from(document.querySelectorAll('.rubric-item'))
+                               .indexOf(target.closest('.rubric-item'));
+        const newOrderIds = Array.from(target.children).map(li => li.dataset.reqId);
+        course.rubric[rubricIdx].requirements = newOrderIds
+          .map(id => course.rubric[rubricIdx].requirements.find(r => r.id === id))
+          .filter(Boolean);
+        // delay re-render to allow Dragula to cleanup mirror
+        setTimeout(renderRubric, 0);
+      })
+      .on('dragend', () => {
+        // remove any lingering Dragula mirror elements
+        document.querySelectorAll('.gu-mirror').forEach(mirror => mirror.remove());
       });
     }
 
