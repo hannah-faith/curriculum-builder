@@ -500,34 +500,20 @@ body {
 }
 
 /* Highlight each requirement block and set grid for draggable area */
+/* Rubric requirements: 4-column, 3-row grid for label/input/audio/url/delete */
 .requirements-list li {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 120px 1fr auto;
+  grid-template-rows: auto auto auto;
   column-gap: 8px;
+  row-gap: 4px;
   align-items: center;
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 4px;
 }
 
-/* Ensure the text input spans the middle column */
-.requirements-list li > input {
-  grid-column: 2;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* Position delete button in the last column */
-.requirements-list li > .delete-req {
-  grid-column: 3;
-  margin-left: 4px;
-}
-
-/* Make audio and URL field-groups span full width below */
-.requirements-list li > .field-group {
-  grid-column: 1 / -1;
-  margin-top: 4px;
-}
+/* Remove old grid placement rules for rubric requirements; new rules below */
 
 /* hide list-style on Dragula’s mirror element */
 .gu-mirror {
@@ -537,4 +523,51 @@ body {
 /* in case it’s recreating a UL/LI structure */
 .gu-mirror li {
   list-style: none !important;
+}
+
+/* Place Include Audio inline in second column */
+
+
+/* ----------- Rubric requirement grid placement ----------- */
+/* Text row */
+.requirements-list li > .text-label {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+}
+.requirements-list li > input[type="text"]:not(.url-input) {
+  grid-column: 3;
+  grid-row: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+.requirements-list li > .delete-req {
+  grid-column: 4;
+  grid-row: 1;
+  justify-self: start;
+}
+
+/* Include Audio row */
+.requirements-list li > .audio-label {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+}
+.requirements-list li > .audio-checkbox {
+  grid-column: 3;
+  grid-row: 2;
+  justify-self: start;
+}
+
+/* Audio URL row */
+.requirements-list li > .url-label {
+  grid-column: 2;
+  grid-row: 3;
+  justify-self: end;
+}
+.requirements-list li > .url-input {
+  grid-column: 3;
+  grid-row: 3;
+  width: 100%;
+  box-sizing: border-box;
 }

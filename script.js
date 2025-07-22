@@ -138,51 +138,47 @@ let rubricDrake;
           li.append(handle);
           // tag for ordering
           li.dataset.reqId = req.id;
-          const inputR = document.createElement('input');
-          inputR.value = req.text;
-          inputR.addEventListener('input', () => {
-            req.text = inputR.value;
-          });
-          const del=document.createElement('button');
-          del.classList.add('delete-req');
-          del.textContent='×';
-          del.addEventListener('click',()=>{
-            item.requirements.splice(j,1);
-            renderRubric();
-          });
-          li.append(inputR,del);
 
-          // Audio option for this requirement
-          const fgAudio = document.createElement('div');
-          fgAudio.className = 'field-group';
-          const chkAudio = document.createElement('input');
-          chkAudio.type = 'checkbox';
-          chkAudio.checked = !!req.audioEnabled;
-          chkAudio.addEventListener('change', () => {
-            // toggle audio enabled flag
-            req.audioEnabled = chkAudio.checked;
-            // remove URL when disabled
+          // --------- Row 1: Text label + input + delete ---------
+          const labelText = document.createElement('label');
+          labelText.className = 'text-label';
+          labelText.textContent = 'Text';
+          const inputR = document.createElement('input');
+          inputR.type = 'text';
+          inputR.value = req.text;
+          inputR.addEventListener('input', () => { req.text = inputR.value; });
+          const del = document.createElement('button');
+          del.classList.add('delete-req');
+          del.textContent = '×';
+          del.addEventListener('click', () => { item.requirements.splice(j,1); renderRubric(); });
+          li.append(labelText, inputR, del);
+
+          // --------- Row 2: Audio label + checkbox ---------
+          const audioLabel = document.createElement('label');
+          audioLabel.className = 'audio-label';
+          audioLabel.textContent = 'Include Audio';
+          const audioCheckbox = document.createElement('input');
+          audioCheckbox.type = 'checkbox';
+          audioCheckbox.className = 'audio-checkbox';
+          audioCheckbox.checked = !!req.audioEnabled;
+          audioCheckbox.addEventListener('change', () => {
+            req.audioEnabled = audioCheckbox.checked;
             if (!req.audioEnabled) delete req.audio;
             renderRubric();
           });
-          const lblAudio = document.createElement('label');
-          lblAudio.textContent = 'Include Audio';
-          lblAudio.append(chkAudio);
-          fgAudio.append(lblAudio);
-          li.append(fgAudio);
+          li.append(audioLabel, audioCheckbox);
 
-          // Show URL field only when audio is enabled
+          // Row 3: Audio URL label + input (only when audio is enabled)
           if (req.audioEnabled) {
-            const fgUrl = document.createElement('div');
-            fgUrl.className = 'field-group';
-            const labelUrl = document.createElement('label');
-            labelUrl.textContent = 'Audio URL';
-            const inputUrl = document.createElement('input');
-            inputUrl.type = 'text';
-            inputUrl.value = req.audio || '';
-            inputUrl.addEventListener('input', () => req.audio = inputUrl.value);
-            fgUrl.append(labelUrl, inputUrl);
-            li.append(fgUrl);
+            const urlLabel = document.createElement('label');
+            urlLabel.className = 'url-label';
+            urlLabel.textContent = 'Audio URL';
+            const urlInput = document.createElement('input');
+            urlInput.type = 'text';
+            urlInput.className = 'url-input';
+            urlInput.value = req.audio || '';
+            urlInput.addEventListener('input', () => { req.audio = urlInput.value; });
+            li.append(urlLabel, urlInput);
           }
 
           ul.append(li);
