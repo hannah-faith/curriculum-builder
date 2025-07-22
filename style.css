@@ -528,3 +528,13 @@ body {
   grid-column: 1 / -1;
   margin-top: 4px;
 }
+
+/* hide list-style on Dragula’s mirror element */
+.gu-mirror {
+  list-style: none !important;
+}
+
+/* in case it’s recreating a UL/LI structure */
+.gu-mirror li {
+  list-style: none !important;
+}
