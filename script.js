@@ -1078,9 +1078,14 @@ document.getElementById('import-json-header').addEventListener('change', event =
         if (obj.tool === 'checkpoint-set') {
           const fgSet = document.createElement('div');
           fgSet.className = 'field-group';
+
+          // Container to hold checkpoint cards in column 2
+          const cpContainer = document.createElement('div');
+          cpContainer.className = 'checkpoint-cards-wrapper';
+
           const lblSet = document.createElement('label');
           lblSet.textContent = 'Checkpoint Set';
-          fgSet.append(lblSet);
+          fgSet.append(lblSet, cpContainer);
 
           obj.checkpoints = obj.checkpoints || [];
           obj.checkpoints.forEach((cp, cpidx) => {
@@ -1258,7 +1263,7 @@ document.getElementById('import-json-header').addEventListener('change', event =
             remCp.addEventListener('click', ()=>{ obj.checkpoints.splice(cpidx,1); renderActivities(); });
             cpBody.append(remCp);
 
-            fgSet.append(cpCard);
+            cpContainer.append(cpCard);
           });
 
           const addCp = document.createElement('button');
@@ -1270,7 +1275,7 @@ document.getElementById('import-json-header').addEventListener('change', event =
             });
             renderActivities();
           });
-          fgSet.append(addCp);
+          cpContainer.append(addCp);
 
           body.append(fgSet);
         }
