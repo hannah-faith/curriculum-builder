@@ -76,6 +76,12 @@ let rubricDrake;
       return { card, header, body };
     }
 
+    /**
+     * Renders the Rubric section of the curriculum editor.
+     * Each rubric item contains fields for type, title, weight, subtitle,
+     * and a dynamic list of requirements that support drag-and-drop reordering.
+     * Triggers a full re-render after most changes.
+     */
     function renderRubric(){
       // Ensure every requirement is an object with a unique id
       course.rubric.forEach(item => {
@@ -229,6 +235,11 @@ let rubricDrake;
       });
     }
 
+/**
+ * Renders all section groups and their nested sections and steps.
+ * Steps include UI for block groups and blocks.
+ * Automatically updates data bindings and re-renders upon interaction.
+ */
 function renderSectionGroups() {
   const list = document.getElementById('section-groups-list');
   list.innerHTML = '';
@@ -412,9 +423,11 @@ function renderSectionGroups() {
         addBgBtn.setAttribute('type', 'button');
         addBgBtn.textContent = '+ Add Block Group';
         addBgBtn.addEventListener('click', e => {
-          console.log('🔹 Add Block Group clicked for step:', step);
           e.preventDefault();
-          step.stepBlockGroups.push({ id: genUUID(), variant: 'none', blocks: [] });
+          const newGroup = { id: genUUID(), variant: 'none', blocks: [] };
+          const newBlock = { id: genUUID(), type: 'text' };
+          newGroup.blocks.push(newBlock);
+          step.stepBlockGroups.push(newGroup);
           renderSectionGroups();
         });
         stepCard.append(addBgBtn);
@@ -470,6 +483,12 @@ document.getElementById('add-vocab-button').addEventListener('click',()=>{course
 document.getElementById('add-rubric-item').addEventListener('click',()=>{course.rubric.push({id:genUUID(),type:'',title:'',requirements:[]});renderRubric();});
 document.getElementById('add-section-group').addEventListener('click',()=>{course.section_groups.push({id:genUUID(),title:'',sections:[]});renderSectionGroups();});
 
+    /**
+     * Prepares a deep-cloned version of the course for export.
+     * - Transforms camelCase keys to snake_case
+     * - Moves media fields under `media` key for media blocks
+     * - Flattens contexts and ensures correct JSON structure for backend
+     */
     // Prepare a deep copy of the course with media blocks nested under "media" and snake_case keys
     function prepareExportData(course) {
       // Deep clone
@@ -481,6 +500,7 @@ document.getElementById('add-section-group').addEventListener('click',()=>{cours
             step.block_groups = step.block_groups || [];
             step.stepBlockGroups?.forEach(bg => {
               bg.blocks.forEach(block => {
+                // Consolidate media fields under a single 'media' object for export
                 if (block.type === 'media' && block.url !== undefined && block.mediaType !== undefined) {
                   block.media = { url: block.url, type: block.mediaType };
                   delete block.url;
@@ -557,6 +577,10 @@ document.getElementById('add-section-group').addEventListener('click',()=>{cours
 
 
 
+    /**
+     * Converts all snake_case keys in an object (including deeply nested structures)
+     * to camelCase for use in the in-browser editor. Also converts 'block_groups' → 'stepBlockGroups'.
+     */
     // Convert snake_case keys back to camelCase (and block_groups→stepBlockGroups)
     function snakeToCamel(obj) {
       if (Array.isArray(obj)) return obj.map(snakeToCamel);
@@ -565,6 +589,7 @@ document.getElementById('add-section-group').addEventListener('click',()=>{cours
         Object.entries(obj).forEach(([key, value]) => {
           // Map snake_case to camelCase
           let newKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+          // Special case: convert 'block_groups' to 'stepBlockGroups' to match internal format
           if (newKey === 'blockGroups') newKey = 'stepBlockGroups';
           result[newKey] = snakeToCamel(value);
         });
@@ -707,6 +732,10 @@ document.getElementById('import-json-header').addEventListener('change', event =
       });
     }
 
+    /**
+     * Renders scoring criteria for the course, including components and context mappings.
+     * Supports multiple component types (e.g., checkpoint, activity) and variants like rubric scoring.
+     */
     // Render Scoring panel
     function renderScoring() {
       const list = document.getElementById('criteria-list');
@@ -987,6 +1016,10 @@ document.getElementById('import-json-header').addEventListener('change', event =
       });
     }
 
+    /**
+     * Renders the Activities Mapping panel for associating activities to tools and URLs.
+     * Includes a JSON editor for raw overrides and a full UI for checkpoint sets.
+     */
     // Render Activities Mapping panel
     function renderActivities() {
       syncActivities();
@@ -1286,6 +1319,7 @@ document.body.addEventListener('click', e => {
 });
 
     // Helpers for blocks UI
+    // Generic helper: adds a labeled single-line input field to the container
     function addField(container, labelText, obj, prop) {
       const fg = document.createElement('div'); fg.className = 'field-group';
       const lbl = document.createElement('label'); lbl.textContent = labelText;
@@ -1294,6 +1328,7 @@ document.body.addEventListener('click', e => {
       fg.append(lbl, inp); container.append(fg);
     }
 
+    // Generic helper: adds a labeled textarea to the container
     function addTextarea(container, labelText, obj, prop) {
       const fg = document.createElement('div');
       fg.className = 'field-group';
@@ -1306,6 +1341,7 @@ document.body.addEventListener('click', e => {
       container.append(fg);
     }
 
+    // Generic helper: adds a checkbox with label to the container
     function addCheckbox(container, labelText, obj, prop) {
       const fg = document.createElement('div'); fg.className = 'field-group';
       const chk = document.createElement('input'); chk.type = 'checkbox'; chk.checked = obj[prop] || false;
@@ -1314,6 +1350,7 @@ document.body.addEventListener('click', e => {
       fg.append(lbl); container.append(fg);
     }
 
+    // Generic helper: adds a labeled dropdown/select menu to the container
     function addSelect(container, labelText, obj, prop, options) {
       const fg = document.createElement('div'); fg.className = 'field-group';
       const lbl = document.createElement('label'); lbl.textContent = labelText;
@@ -1413,6 +1450,13 @@ document.body.addEventListener('click', e => {
               urlInput.addEventListener('input', () => blk.audio = urlInput.value);
               urlFg.append(urlLbl, urlInput);
               typeFields.append(urlFg);
+            }
+
+            // Row: placeholder for checkpoint choices
+            if (blk.type === 'checkpoint') {
+              const choicesContainer = document.createElement('div');
+              choicesContainer.className = 'choices-container';
+              typeFields.append(choicesContainer);
             }
 
             switch (blk.type) {

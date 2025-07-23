@@ -571,3 +571,8 @@ body {
   width: 100%;
   box-sizing: border-box;
 }
+
+/* DEBUG: highlight choice-item containers */
+.choice-item {
+  border: 2px dotted red !important;
+}
