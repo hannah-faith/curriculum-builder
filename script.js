@@ -1343,11 +1343,16 @@ document.body.addEventListener('click', e => {
 
     // Generic helper: adds a checkbox with label to the container
     function addCheckbox(container, labelText, obj, prop) {
-      const fg = document.createElement('div'); fg.className = 'field-group';
-      const chk = document.createElement('input'); chk.type = 'checkbox'; chk.checked = obj[prop] || false;
+      const fg = document.createElement('div');
+      fg.className = 'field-group';
+      const lbl = document.createElement('label');
+      lbl.textContent = labelText;
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.checked = obj[prop] || false;
       chk.addEventListener('change', () => obj[prop] = chk.checked);
-      const lbl = document.createElement('label'); lbl.textContent = labelText; lbl.prepend(chk);
-      fg.append(lbl); container.append(fg);
+      fg.append(lbl, chk);
+      container.append(fg);
     }
 
     // Generic helper: adds a labeled dropdown/select menu to the container
@@ -1689,111 +1694,127 @@ document.body.addEventListener('click', e => {
                 });
                 typeFields.append(qContainer, addQBBtn);
 
-                // Choices with correct checkbox and per-choice explanation UI
-                const choicesContainer = document.createElement('div');
-                choicesContainer.className = 'choices-container';
-                blk.choices = blk.choices || [];
-                blk.choices.forEach((choice, cidx) => {
-                  const choiceDiv = document.createElement('div');
-                  choiceDiv.className = 'choice-item card';
-                  const choiceHeader = document.createElement('div');
-                  choiceHeader.className = 'card-header';
-                  choiceHeader.textContent = `Choice ${cidx+1}`;
-                  choiceDiv.append(choiceHeader);
+              // Choices with correct checkbox (NO per-choice explanations)
+              const choicesContainer = document.createElement('div');
+              choicesContainer.className = 'choices-container';
+              blk.choices = blk.choices || [];
+              blk.choices.forEach((choice, cidx) => {
+                const choiceDiv = document.createElement('div');
+                choiceDiv.className = 'choice-item card';
+                const choiceHeader = document.createElement('div');
+                choiceHeader.className = 'card-header';
+                choiceHeader.textContent = `Choice ${cidx+1}`;
+                choiceDiv.append(choiceHeader);
 
-                  // Type selector
-                  addSelect(choiceDiv, 'Type', choice, 'type', ['text','code','media']);
-                  // Container for fields
-                  const chFields = document.createElement('div');
-                  chFields.className = 'field-group ch-fields';
-                  choiceDiv.append(chFields);
-                  // Render choice fields
-                  function renderChFields() {
-                    chFields.innerHTML = '';
-                    switch(choice.type) {
-                      case 'text':
-                        addTextarea(chFields, 'Text', choice, 'text');
-                        break;
-                      case 'code':
-                        addTextarea(chFields, 'Code', choice, 'code');
-                        addSelect(chFields, 'Language', choice, 'language', ['python','java','html','css','js']);
-                        break;
-                      case 'media':
-                        addSelect(chFields, 'Media Type', choice, 'mediaType', ['image','video']);
-                        addField(chFields, 'URL', choice, 'url');
-                        // Optional height (px) field for choice media
-                        const fgCH = document.createElement('div');
-                        fgCH.className = 'field-group';
-                        const lblCH = document.createElement('label');
-                        lblCH.textContent = 'Height (px)';
-                        const inputCH = document.createElement('input');
-                        inputCH.type = 'number';
-                        inputCH.value = choice.height ? parseInt(choice.height, 10) : '';
-                        inputCH.addEventListener('input', () => {
-                          choice.height = inputCH.value ? inputCH.value + 'px' : '';
-                        });
-                        fgCH.append(lblCH, inputCH);
-                        chFields.append(fgCH);
-                        break;
-                    }
-                    addCheckbox(chFields, 'Correct', choice, 'correct');
-                    // Per-choice explanations (reuse current explanation logic)
-                    const explContainer = document.createElement('div');
-                    explContainer.className = 'explanation-container';
-                    choice.explanation = choice.explanation || [];
-                    choice.explanation.forEach((exp, eidx) => {
-                      const expDiv = document.createElement('div');
-                      expDiv.className = 'explanation-item';
-                      addSelect(expDiv, 'Type', exp, 'type', ['text','media']);
-                      if (exp.type === 'text') {
-                        addTextarea(expDiv, 'Text', exp, 'text');
-                      } else {
-                        addSelect(expDiv, 'Media Type', exp, 'mediaType', ['image','video']);
-                        addField(expDiv, 'URL', exp, 'url');
-                      }
-                      const remExp = document.createElement('button');
-                      remExp.type = 'button';
-                      remExp.textContent = '×';
-                      remExp.addEventListener('click', () => {
-                        choice.explanation.splice(eidx, 1);
-                        renderSectionGroups();
+                // Container for fields (including Type dropdown)
+                const chFields = document.createElement('div');
+                chFields.className = 'field-group type-fields ch-fields';
+                choiceDiv.append(chFields);
+
+                // Render choice fields
+                function renderChFields() {
+                  chFields.innerHTML = '';
+                  // Row 1: Type selector
+                  addSelect(chFields, 'Type', choice, 'type', ['text','code','media']);
+                  chFields.querySelector('select').addEventListener('change', renderChFields);
+
+                  // Rows based on choice type
+                  switch (choice.type) {
+                    case 'text':
+                      addTextarea(chFields, 'Text', choice, 'text');
+                      break;
+                    case 'code':
+                      addTextarea(chFields, 'Code', choice, 'code');
+                      addSelect(chFields, 'Language', choice, 'language', ['python','java','html','css','js']);
+                      break;
+                    case 'media':
+                      addSelect(chFields, 'Media Type', choice, 'mediaType', ['image','video']);
+                      addField(chFields, 'URL', choice, 'url');
+                      const fgCH = document.createElement('div');
+                      fgCH.className = 'field-group';
+                      const lblCH = document.createElement('label');
+                      lblCH.textContent = 'Height (px)';
+                      const inputCH = document.createElement('input');
+                      inputCH.type = 'number';
+                      inputCH.value = choice.height ? parseInt(choice.height, 10) : '';
+                      inputCH.addEventListener('input', () => {
+                        choice.height = inputCH.value ? inputCH.value + 'px' : '';
                       });
-                      expDiv.append(remExp);
-                      explContainer.append(expDiv);
-                    });
-                    const addExpBtn = document.createElement('button');
-                    addExpBtn.type = 'button';
-                    addExpBtn.textContent = '+ Add Explanation';
-                    addExpBtn.addEventListener('click', () => {
-                      choice.explanation.push({ type: 'text', text: '' });
-                      renderSectionGroups();
-                    });
-                    chFields.append(explContainer, addExpBtn);
+                      fgCH.append(lblCH, inputCH);
+                      chFields.append(fgCH);
+                      break;
                   }
-                  // Bind and initial render
-                  choiceDiv.querySelector('select').addEventListener('change', renderChFields);
-                  renderChFields();
 
-                  // Remove choice
-                  const remChoiceBtn = document.createElement('button');
-                  remChoiceBtn.type = 'button';
-                  remChoiceBtn.textContent = 'Remove Choice';
-                  remChoiceBtn.addEventListener('click', () => {
-                    blk.choices.splice(cidx, 1);
-                    renderSectionGroups();
-                  });
-                  choiceDiv.append(remChoiceBtn);
+                  // Row 3: Correct checkbox
+                  addCheckbox(chFields, 'Correct', choice, 'correct');
+                }
+                renderChFields();
 
-                  choicesContainer.append(choiceDiv);
-                });
-                const addChoiceBtn = document.createElement('button');
-                addChoiceBtn.type = 'button';
-                addChoiceBtn.textContent = '+ Add Choice';
-                addChoiceBtn.addEventListener('click', () => {
-                  blk.choices.push({ type:'text', text:'', explanation:[] });
+                // Remove choice
+                const remChoiceBtn = document.createElement('button');
+                remChoiceBtn.type = 'button';
+                remChoiceBtn.textContent = 'Remove Choice';
+                remChoiceBtn.addEventListener('click', () => {
+                  blk.choices.splice(cidx, 1);
                   renderSectionGroups();
                 });
-                typeFields.append(choicesContainer, addChoiceBtn);
+                choiceDiv.append(remChoiceBtn);
+
+                choicesContainer.append(choiceDiv);
+              });
+              const addChoiceBtn = document.createElement('button');
+              addChoiceBtn.type = 'button';
+              addChoiceBtn.textContent = '+ Add Choice';
+              addChoiceBtn.addEventListener('click', () => {
+                blk.choices.push({ type:'text', text:'', explanation:[] });
+                renderSectionGroups();
+              });
+              typeFields.append(choicesContainer, addChoiceBtn);
+
+                // Explanation (block-level)
+                blk.explanation = blk.explanation || [];
+                const exCont = document.createElement('div');
+                exCont.className = 'explanation-container';
+                blk.explanation.forEach((ex, eidx) => {
+                  const exCard = document.createElement('div');
+                  exCard.className = 'card';
+                  const exHdr = document.createElement('div');
+                  exHdr.className = 'card-header';
+                  exHdr.textContent = `Explanation ${eidx+1}`;
+                  const exBody = document.createElement('div');
+                  exBody.className = 'card-body';
+                  exCard.append(exHdr, exBody);
+
+                  addSelect(exBody, 'Type', ex, 'type', ['text','media']);
+                  function renderExFields() {
+                    exBody.querySelectorAll('.field-group:not(:first-child)').forEach(n => n.remove());
+                    if (ex.type === 'text') {
+                      addTextarea(exBody, 'Text', ex, 'text');
+                    } else {
+                      addSelect(exBody, 'Media Type', ex, 'mediaType', ['image','video']);
+                      addField(exBody, 'URL', ex, 'url');
+                    }
+                  }
+                  exCard.querySelector('select').addEventListener('change', renderExFields);
+                  renderExFields();
+
+                  const remEx = document.createElement('button');
+                  remEx.type = 'button';
+                  remEx.textContent = 'Remove Explanation';
+                  remEx.addEventListener('click', () => { blk.explanation.splice(eidx,1); renderSectionGroups(); });
+                  exBody.append(remEx);
+
+                  exCont.append(exCard);
+                });
+                const addExBtn = document.createElement('button');
+                addExBtn.type = 'button';
+                addExBtn.textContent = '+ Add Explanation';
+                addExBtn.addEventListener('click', () => {
+                  blk.explanation.push({ id: genUUID(), type: 'text', text: '' });
+                  renderSectionGroups();
+                });
+                exCont.append(addExBtn);
+                typeFields.append(exCont);
 
                 // Placeholder and Error Message (unchanged)
                 addTextarea(typeFields, 'Placeholder', blk, 'placeholder');
