@@ -1681,8 +1681,12 @@ function renderBlockList(blkList, bg, step, container) {
           addSelect(typeFields, 'Variant', blk, 'variant', ['none', 'python', 'java', 'html', 'css', 'console', 'college-board']);
           break;
         case 'media':
-          addSelect(typeFields, 'Media Type', blk, 'mediaType', ['image', 'video']);
-          addField(typeFields, 'URL', blk, 'url');
+          blk.media = blk.media || {};
+          addSelect(typeFields, 'Media Type', blk.media, 'type', ['image', 'video']);
+          addField(typeFields, 'URL', blk.media, 'url');
+          // Maintain backward compatibility with flat URL and mediaType
+          if (!blk.media.url && blk.url) blk.media.url = blk.url;
+          if (!blk.media.type && blk.mediaType) blk.media.type = blk.mediaType;
           const fgH = document.createElement('div');
           fgH.className = 'field-group';
           const lblH = document.createElement('label');
