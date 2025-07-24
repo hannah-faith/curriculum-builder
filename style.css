@@ -35,6 +35,13 @@ body {
   color: var(--hw-white);
 }
 
+.header-text {
+  padding-left: 10px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
 /* Ensure header buttons stand out */
 .fixed-header button {
   background-color: var(--hw-white) !important;
