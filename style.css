@@ -67,30 +67,34 @@ body {
 }
 
 /* File Input Styling */
-.file-input-wrapper {
-  display: inline-block;
+/* Custom file upload button to mimic export button */
+/* Custom file upload button to match Export JSON button exactly */
+.custom-file-upload {
+  line-height: normal;
+  padding: 6px 12px;
+  margin: 2px;
+  border: 1px solid var(--hw-white) !important;
   border-radius: 4px;
-  padding: 4px 8px;
-  margin-left: 0.5rem;
-  background-color: var(--hw-primary-light);
-}
-
-.file-input-wrapper input[type="file"] {
-  border: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  font-size: 1rem;
+  background-color: var(--hw-white) !important;
+  color: var(--hw-primary) !important;
   cursor: pointer;
-  display: inline-block;
-  color: var(--hw-white);
-  background: transparent;
+  font: inherit;
+  font-size: 13.5px;
+  box-sizing: border-box;
+  transition: background-color 0.2s, border-color 0.2s;
+  vertical-align: middle;
+}
+.custom-file-upload:hover {
+  background-color: var(--hw-neutral) !important;
+  border-color: var(--hw-white) !important;
+}
+.custom-file-upload input[type="file"] {
+  display: none;
 }
 
-.file-input-wrapper input[type="file"]::-webkit-file-upload-button,
-.file-input-wrapper input[type="file"]::file-selector-button {
-  font: inherit;
-  font-size: 1rem;
+/* Hide native file input "No file chosen" text */
+input[type="file"] {
+  display: none !important;
 }
 
 /* ===============================
@@ -627,4 +631,10 @@ body {
   padding: 0.25rem 0.5rem;
   margin-bottom: 0.5rem;
   box-shadow: 0 1px rgba(0,0,0,0.05);
+}
+
+/* File name display next to Import button */
+.file-name {
+  margin-left: 8px;
+  line-height: 32px;
 }

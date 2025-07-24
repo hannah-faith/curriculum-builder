@@ -635,6 +635,13 @@ function fullRender() {
 
 document.getElementById('import-json-header').addEventListener('change', event => {
   const file = event.target.files[0];
+  // Display filename in the span next to the Import button
+  const filenameSpan = document.getElementById('import-filename');
+  if (file) {
+    filenameSpan.textContent = file.name;
+  } else {
+    filenameSpan.textContent = '';
+  }
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
