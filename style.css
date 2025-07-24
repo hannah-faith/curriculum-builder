@@ -431,7 +431,7 @@ input:focus, select:focus, textarea:focus {
 /* Transparent Primary Fields */
 .step-item.card > .card-body > .field-group,
 .section-group-item.card > .card-body > .field-group:first-child,
-.section-item.card > .field-group {
+.section-item.card > .field-group, .rubric-item {
   background-color: transparent;
 }
 
