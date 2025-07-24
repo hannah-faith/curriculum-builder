@@ -837,7 +837,9 @@ document.getElementById('import-json-header').addEventListener('change', event =
         mediaUrl: data.media?.url || '',
         mediaType: data.media?.type || 'image',
         language: data.language || 'CoBlocks',
-        vocabulary: Array.isArray(data.vocabulary) ? data.vocabulary : [],
+        vocabulary: typeof data.vocabulary === 'string' || Array.isArray(data.vocabulary)
+          ? data.vocabulary
+          : [],
         rubric: Array.isArray(data.rubric) ? data.rubric : [],
         section_groups: Array.isArray(data.sectionGroups) ? data.sectionGroups : Array.isArray(data.section_groups) ? data.section_groups : [],
         scoring: data.scoring || { criteria: [] },
