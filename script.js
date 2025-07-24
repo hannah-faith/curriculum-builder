@@ -1,239 +1,259 @@
 let course = {
-      id: '', name: '', title: '', description: '', mediaUrl: '', mediaType: 'image',
-      language: 'CoBlocks', vocabulary: [], rubric: [], section_groups: [],
-      scoring: { criteria: [] }, activities: {}
-    };
+  id: '', name: '', title: '', description: '', mediaUrl: '', mediaType: 'image',
+  language: 'CoBlocks', vocabulary: [], rubric: [], section_groups: [],
+  scoring: { criteria: [] }, activities: {}
+};
 let rubricDrake;
 
-    // Helper: human-readable checkpoint options
-    function getCheckpointOptions() {
-      const options = [];
-      course.section_groups.forEach(group =>
-        group.sections.forEach(section =>
-          section.steps.forEach(step =>
-            step.stepBlockGroups.forEach(bg =>
-              bg.blocks.forEach(blk => {
-                if (blk.type === 'checkpoint') {
-                  let label = step.title || 'Untitled Step';
-                  if (blk.questionBlocks && blk.questionBlocks.length > 0) {
-                    const text = blk.questionBlocks[0].text || '';
-                    label += ' – ' + (text.length > 30 ? text.slice(0, 30) + '…' : text);
-                  } else {
-                    label += ' – Checkpoint';
-                  }
-                  options.push({ id: blk.id, label });
-                }
-              })
-            )
-          )
-        )
-      );
-      return options;
-    }
-
-    // Helper: human-readable activity options
-    function getActivityOptions() {
-      const seen = new Set();
-      const options = [];
-      course.section_groups.forEach(group =>
-        group.sections.forEach(section =>
-          section.steps.forEach(step => {
-            if (step.activityId && !seen.has(step.activityId)) {
-              seen.add(step.activityId);
-              const label = step.title || step.activityId;
-              options.push({ id: step.activityId, label });
+// Helper: Get human-readable checkpoint options.
+function getCheckpointOptions() {
+  const options = [];
+  course.section_groups.forEach(group =>
+    group.sections.forEach(section =>
+      section.steps.forEach(step =>
+        step.stepBlockGroups.forEach(bg =>
+          bg.blocks.forEach(blk => {
+            if (blk.type === 'checkpoint') {
+              let label = step.title || 'Untitled Step';
+              if (blk.questionBlocks && blk.questionBlocks.length > 0) {
+                const text = blk.questionBlocks[0].text || '';
+                label += ' – ' + (text.length > 30 ? text.slice(0, 30) + '…' : text);
+              } else {
+                label += ' – Checkpoint';
+              }
+              options.push({ id: blk.id, label });
             }
           })
         )
-      );
-      return options;
-    }
+      )
+    )
+  );
+  return options;
+}
 
-    function initCourseDetails() {
-      document.getElementById('course-id').value=course.id;
-      document.getElementById('course-name').value=course.name;
-      document.getElementById('course-title').value=course.title;
-      document.getElementById('course-description').innerHTML=course.description;
-      document.getElementById('media-url').value=course.mediaUrl;
-      document.getElementById('language').value=course.language;
+// Helper: Get human-readable activity options.
+function getActivityOptions() {
+  const seen = new Set();
+  const options = [];
+  course.section_groups.forEach(group =>
+    group.sections.forEach(section =>
+      section.steps.forEach(step => {
+        if (step.activityId && !seen.has(step.activityId)) {
+          seen.add(step.activityId);
+          const label = step.title || step.activityId;
+          options.push({ id: step.activityId, label });
+        }
+      })
+    )
+  );
+  return options;
+}
+
+// Initialize course details in the UI.
+function initCourseDetails() {
+  document.getElementById('course-id').value = course.id;
+  document.getElementById('course-name').value = course.name;
+  document.getElementById('course-title').value = course.title;
+  document.getElementById('course-description').innerHTML = course.description;
+  document.getElementById('media-url').value = course.mediaUrl;
+  document.getElementById('language').value = course.language;
+  refreshVocabList();
+}
+
+// Refresh the vocabulary tag list in the UI.
+function refreshVocabList() {
+  const list = document.getElementById('vocabulary-list');
+  list.innerHTML = '';
+  course.vocabulary.forEach((tag, i) => {
+    const div = document.createElement('div');
+    div.className = 'tag-item';
+    const input = document.createElement('input');
+    input.value = tag;
+    input.addEventListener('input', () => course.vocabulary[i] = input.value);
+    const btn = document.createElement('button');
+    btn.textContent = '×';
+    btn.addEventListener('click', () => {
+      course.vocabulary.splice(i, 1);
       refreshVocabList();
-    }
+    });
+    div.append(input, btn);
+    list.appendChild(div);
+  });
+}
 
-    function refreshVocabList(){const list=document.getElementById('vocabulary-list');list.innerHTML='';course.vocabulary.forEach((tag,i)=>{const div=document.createElement('div');div.className='tag-item';const input=document.createElement('input');input.value=tag;input.addEventListener('input',()=>course.vocabulary[i]=input.value);const btn=document.createElement('button');btn.textContent='×';btn.addEventListener('click',()=>{course.vocabulary.splice(i,1);refreshVocabList();});div.append(input,btn);list.appendChild(div);});}
+// Helper: Create a standard card with header and body (body visible by default).
+function createCard(headerText, additionalClass = '') {
+  const card = document.createElement('div');
+  card.className = 'card' + (additionalClass ? ' ' + additionalClass : '');
+  const header = document.createElement('div');
+  header.className = 'card-header';
+  header.textContent = headerText;
+  const body = document.createElement('div');
+  body.className = 'card-body';
+  // Ensure visible by default.
+  body.classList.remove('hidden');
+  card.append(header, body);
+  return { card, header, body };
+}
 
-    // Helper: create a standard card with header and body (body visible by default)
-    function createCard(headerText, additionalClass = '') {
-      const card = document.createElement('div');
-      card.className = 'card' + (additionalClass ? ' ' + additionalClass : '');
-      const header = document.createElement('div');
-      header.className = 'card-header';
-      header.textContent = headerText;
-      const body = document.createElement('div');
-      body.className = 'card-body';
-      // Ensure visible by default
-      body.classList.remove('hidden');
-      card.append(header, body);
-      return { card, header, body };
-    }
+/**
+ * Renders the Rubric section of the curriculum editor.
+ * Each rubric item contains fields for type, title, weight, subtitle,
+ * and a dynamic list of requirements that support drag-and-drop reordering.
+ * Triggers a full re-render after most changes.
+ */
+function renderRubric() {
+  // Ensure every requirement is an object with a unique id.
+  course.rubric.forEach(item => {
+    item.requirements = item.requirements.map(r => {
+      if (typeof r === 'string') return { id: genUUID(), text: r };
+      if (!r.id) r.id = genUUID();
+      return r;
+    });
+  });
+  const list = document.getElementById('rubric-list');
+  list.innerHTML = '';
+  course.rubric.forEach((item, idx) => {
+    const { card, header, body } = createCard(`Rubric Item ${idx + 1}`, 'rubric-item');
+    ['type', 'title'].forEach(field => {
+      const fg = document.createElement('div');
+      fg.className = 'field-group';
+      const label = document.createElement('label');
+      label.textContent = field.charAt(0).toUpperCase() + field.slice(1);
+      const input = document.createElement('input');
+      input.value = item[field];
+      input.addEventListener('input', () => item[field] = input.value);
+      fg.append(label, input);
+      body.append(fg);
+    });
+    // Weight field (required).
+    const fgWeight = document.createElement('div');
+    fgWeight.className = 'field-group';
+    const labelWeight = document.createElement('label');
+    labelWeight.textContent = 'Weight';
+    const inputWeight = document.createElement('input');
+    inputWeight.type = 'text';
+    inputWeight.value = item.weight || '';
+    inputWeight.addEventListener('input', () => { item.weight = inputWeight.value; });
+    fgWeight.append(labelWeight, inputWeight);
+    body.append(fgWeight);
 
-    /**
-     * Renders the Rubric section of the curriculum editor.
-     * Each rubric item contains fields for type, title, weight, subtitle,
-     * and a dynamic list of requirements that support drag-and-drop reordering.
-     * Triggers a full re-render after most changes.
-     */
-    function renderRubric(){
-      // Ensure every requirement is an object with a unique id
-      course.rubric.forEach(item => {
-        item.requirements = item.requirements.map(r => {
-          if (typeof r === 'string') return { id: genUUID(), text: r };
-          if (!r.id) r.id = genUUID();
-          return r;
-        });
+    // Subtitle field (optional).
+    const fgSubtitle = document.createElement('div');
+    fgSubtitle.className = 'field-group';
+    const labelSubtitle = document.createElement('label');
+    labelSubtitle.textContent = 'Subtitle (optional)';
+    const textareaSubtitle = document.createElement('textarea');
+    textareaSubtitle.value = item.subtitle || '';
+    textareaSubtitle.addEventListener('input', () => { item.subtitle = textareaSubtitle.value; });
+    fgSubtitle.append(labelSubtitle, textareaSubtitle);
+    body.append(fgSubtitle);
+
+    const fgReq = document.createElement('div');
+    fgReq.className = 'field-group';
+    const labelReq = document.createElement('label');
+    labelReq.textContent = 'Requirements';
+    const ul = document.createElement('ul');
+    ul.className = 'requirements-list';
+    item.requirements.forEach((req, j) => {
+      const li = document.createElement('li');
+      // Drag handle for requirement.
+      const handle = document.createElement('span');
+      handle.className = 'drag-handle';
+      handle.textContent = '⋮⋮';
+      li.append(handle);
+      // Tag for ordering.
+      li.dataset.reqId = req.id;
+
+      // Row 1: Text label + input + delete.
+      const labelText = document.createElement('label');
+      labelText.className = 'text-label';
+      labelText.textContent = 'Text';
+      const inputR = document.createElement('input');
+      inputR.type = 'text';
+      inputR.value = req.text;
+      inputR.addEventListener('input', () => { req.text = inputR.value; });
+      const del = document.createElement('button');
+      del.classList.add('delete-req');
+      del.textContent = '×';
+      del.addEventListener('click', () => { item.requirements.splice(j, 1); renderRubric(); });
+      li.append(labelText, inputR, del);
+
+      // Row 2: Audio label + checkbox.
+      const audioLabel = document.createElement('label');
+      audioLabel.className = 'audio-label';
+      audioLabel.textContent = 'Include Audio';
+      const audioCheckbox = document.createElement('input');
+      audioCheckbox.type = 'checkbox';
+      audioCheckbox.className = 'audio-checkbox';
+      audioCheckbox.checked = !!req.audioEnabled;
+      audioCheckbox.addEventListener('change', () => {
+        req.audioEnabled = audioCheckbox.checked;
+        if (!req.audioEnabled) delete req.audio;
+        renderRubric();
       });
-      const list=document.getElementById('rubric-list');
-      list.innerHTML='';
-      course.rubric.forEach((item,idx)=>{
-        const { card, header, body } = createCard(`Rubric Item ${idx+1}`, 'rubric-item');
-        ['type','title'].forEach(field=>{
-          const fg=document.createElement('div');
-          fg.className='field-group';
-          const label=document.createElement('label');
-          label.textContent=field.charAt(0).toUpperCase()+field.slice(1);
-          const input=document.createElement('input');
-          input.value=item[field];
-          input.addEventListener('input',()=>item[field]=input.value);
-          fg.append(label,input);
-          body.append(fg);
-        });
-        // Weight field (required)
-        const fgWeight = document.createElement('div');
-        fgWeight.className = 'field-group';
-        const labelWeight = document.createElement('label');
-        labelWeight.textContent = 'Weight';
-        const inputWeight = document.createElement('input');
-        inputWeight.type = 'text';
-        inputWeight.value = item.weight || '';
-        inputWeight.addEventListener('input', () => { item.weight = inputWeight.value; });
-        fgWeight.append(labelWeight, inputWeight);
-        body.append(fgWeight);
+      li.append(audioLabel, audioCheckbox);
 
-        // Subtitle field (optional)
-        const fgSubtitle = document.createElement('div');
-        fgSubtitle.className = 'field-group';
-        const labelSubtitle = document.createElement('label');
-        labelSubtitle.textContent = 'Subtitle (optional)';
-        const textareaSubtitle = document.createElement('textarea');
-        textareaSubtitle.value = item.subtitle || '';
-        textareaSubtitle.addEventListener('input', () => { item.subtitle = textareaSubtitle.value; });
-        fgSubtitle.append(labelSubtitle, textareaSubtitle);
-        body.append(fgSubtitle);
+      // Row 3: Audio URL label + input (only when audio is enabled).
+      if (req.audioEnabled) {
+        const urlLabel = document.createElement('label');
+        urlLabel.className = 'url-label';
+        urlLabel.textContent = 'Audio URL';
+        const urlInput = document.createElement('input');
+        urlInput.type = 'text';
+        urlInput.className = 'url-input';
+        urlInput.value = req.audio || '';
+        urlInput.addEventListener('input', () => { req.audio = urlInput.value; });
+        li.append(urlLabel, urlInput);
+      }
 
-        const fgReq=document.createElement('div');
-        fgReq.className='field-group';
-        const labelReq=document.createElement('label');
-        labelReq.textContent='Requirements';
-        const ul=document.createElement('ul');
-        ul.className='requirements-list';
-        item.requirements.forEach((req,j)=>{
-          const li=document.createElement('li');
-          // drag handle for requirement
-          const handle = document.createElement('span');
-          handle.className = 'drag-handle';
-          handle.textContent = '⋮⋮';
-          li.append(handle);
-          // tag for ordering
-          li.dataset.reqId = req.id;
-
-          // --------- Row 1: Text label + input + delete ---------
-          const labelText = document.createElement('label');
-          labelText.className = 'text-label';
-          labelText.textContent = 'Text';
-          const inputR = document.createElement('input');
-          inputR.type = 'text';
-          inputR.value = req.text;
-          inputR.addEventListener('input', () => { req.text = inputR.value; });
-          const del = document.createElement('button');
-          del.classList.add('delete-req');
-          del.textContent = '×';
-          del.addEventListener('click', () => { item.requirements.splice(j,1); renderRubric(); });
-          li.append(labelText, inputR, del);
-
-          // --------- Row 2: Audio label + checkbox ---------
-          const audioLabel = document.createElement('label');
-          audioLabel.className = 'audio-label';
-          audioLabel.textContent = 'Include Audio';
-          const audioCheckbox = document.createElement('input');
-          audioCheckbox.type = 'checkbox';
-          audioCheckbox.className = 'audio-checkbox';
-          audioCheckbox.checked = !!req.audioEnabled;
-          audioCheckbox.addEventListener('change', () => {
-            req.audioEnabled = audioCheckbox.checked;
-            if (!req.audioEnabled) delete req.audio;
-            renderRubric();
-          });
-          li.append(audioLabel, audioCheckbox);
-
-          // Row 3: Audio URL label + input (only when audio is enabled)
-          if (req.audioEnabled) {
-            const urlLabel = document.createElement('label');
-            urlLabel.className = 'url-label';
-            urlLabel.textContent = 'Audio URL';
-            const urlInput = document.createElement('input');
-            urlInput.type = 'text';
-            urlInput.className = 'url-input';
-            urlInput.value = req.audio || '';
-            urlInput.addEventListener('input', () => { req.audio = urlInput.value; });
-            li.append(urlLabel, urlInput);
-          }
-
-          ul.append(li);
-        });
-        const addR=document.createElement('button');
-        addR.textContent='+ Add Requirement';
-        addR.addEventListener('click', () => {
-          item.requirements.push({ id: genUUID(), text: '' });
-          renderRubric();
-        });
-        fgReq.append(labelReq,ul,addR);
-        body.append(fgReq);
-        const ctrl=document.createElement('div');
-        ['Move Up','Move Down','Delete Item'].forEach(text=>{
-          const btn=document.createElement('button');
-          btn.textContent=text;
-          btn.addEventListener('click',()=>{
-            if(text==='Delete Item')course.rubric.splice(idx,1);
-            else if(text==='Move Up'&&idx>0)[course.rubric[idx-1],course.rubric[idx]]=[course.rubric[idx],course.rubric[idx-1]];
-            else if(text==='Move Down'&&idx<course.rubric.length-1)[course.rubric[idx+1],course.rubric[idx]]=[course.rubric[idx],course.rubric[idx+1]];
-            renderRubric();
-          });
-          ctrl.append(btn);
-        });
-        body.append(ctrl);
-        card.append(header,body);
-        list.append(card);
+      ul.append(li);
+    });
+    const addR = document.createElement('button');
+    addR.textContent = '+ Add Requirement';
+    addR.addEventListener('click', () => {
+      item.requirements.push({ id: genUUID(), text: '' });
+      renderRubric();
+    });
+    fgReq.append(labelReq, ul, addR);
+    body.append(fgReq);
+    const ctrl = document.createElement('div');
+    ['Move Up', 'Move Down', 'Delete Item'].forEach(text => {
+      const btn = document.createElement('button');
+      btn.textContent = text;
+      btn.addEventListener('click', () => {
+        if (text === 'Delete Item') course.rubric.splice(idx, 1);
+        else if (text === 'Move Up' && idx > 0) [course.rubric[idx - 1], course.rubric[idx]] = [course.rubric[idx], course.rubric[idx - 1]];
+        else if (text === 'Move Down' && idx < course.rubric.length - 1) [course.rubric[idx + 1], course.rubric[idx]] = [course.rubric[idx], course.rubric[idx + 1]];
+        renderRubric();
       });
-      // initialize dragula for rubric requirements
-      if (rubricDrake) rubricDrake.destroy();
-      const reqContainers = Array.from(document.querySelectorAll('.requirements-list'));
-      rubricDrake = window.dragula(reqContainers, {
-        moves: (el, source, handle) => handle.classList.contains('drag-handle')
-      })
-      .on('drop', (el, target) => {
-        const rubricIdx = Array.from(document.querySelectorAll('.rubric-item'))
-                               .indexOf(target.closest('.rubric-item'));
-        const newOrderIds = Array.from(target.children).map(li => li.dataset.reqId);
-        course.rubric[rubricIdx].requirements = newOrderIds
-          .map(id => course.rubric[rubricIdx].requirements.find(r => r.id === id))
-          .filter(Boolean);
-        // delay re-render to allow Dragula to cleanup mirror
-        setTimeout(renderRubric, 0);
-      })
-      .on('dragend', () => {
-        // remove any lingering Dragula mirror elements
-        document.querySelectorAll('.gu-mirror').forEach(mirror => mirror.remove());
-      });
-    }
+      ctrl.append(btn);
+    });
+    body.append(ctrl);
+    card.append(header, body);
+    list.append(card);
+  });
+  // Initialize dragula for rubric requirements.
+  if (rubricDrake) rubricDrake.destroy();
+  const reqContainers = Array.from(document.querySelectorAll('.requirements-list'));
+  rubricDrake = window.dragula(reqContainers, {
+    moves: (el, source, handle) => handle.classList.contains('drag-handle')
+  })
+    .on('drop', (el, target) => {
+      const rubricIdx = Array.from(document.querySelectorAll('.rubric-item'))
+        .indexOf(target.closest('.rubric-item'));
+      const newOrderIds = Array.from(target.children).map(li => li.dataset.reqId);
+      course.rubric[rubricIdx].requirements = newOrderIds
+        .map(id => course.rubric[rubricIdx].requirements.find(r => r.id === id))
+        .filter(Boolean);
+      // Delay re-render to allow Dragula to cleanup mirror.
+      setTimeout(renderRubric, 0);
+    })
+    .on('dragend', () => {
+      // Remove any lingering Dragula mirror elements.
+      document.querySelectorAll('.gu-mirror').forEach(mirror => mirror.remove());
+    });
+}
 
 /**
  * Renders all section groups and their nested sections and steps.
@@ -486,135 +506,132 @@ document.getElementById('add-vocab-button').addEventListener('click',()=>{course
 document.getElementById('add-rubric-item').addEventListener('click',()=>{course.rubric.push({id:genUUID(),type:'',title:'',requirements:[]});renderRubric();});
 document.getElementById('add-section-group').addEventListener('click',()=>{course.section_groups.push({id:genUUID(),title:'',sections:[]});renderSectionGroups();});
 
-    /**
-     * Prepares a deep-cloned version of the course for export.
-     * - Transforms camelCase keys to snake_case
-     * - Moves media fields under `media` key for media blocks
-     * - Flattens contexts and ensures correct JSON structure for backend
-     */
-    // Prepare a deep copy of the course with media blocks nested under "media" and snake_case keys
-    function prepareExportData(course) {
-      // Deep clone
-      const data = JSON.parse(JSON.stringify(course));
-      // Nest media blocks
-      data.section_groups.forEach(group => {
-        group.sections.forEach(section => {
-          section.steps.forEach(step => {
-            step.block_groups = step.block_groups || [];
-            step.stepBlockGroups?.forEach(bg => {
-              bg.blocks.forEach(block => {
-                // Consolidate media fields under a single 'media' object for export
-                if (block.type === 'media' && block.url !== undefined && block.mediaType !== undefined) {
-                  block.media = { url: block.url, type: block.mediaType };
-                  delete block.url;
-                  delete block.mediaType;
-                }
-              });
-            });
+/**
+ * Prepares a deep-cloned version of the course for export.
+ * - Transforms camelCase keys to snake_case.
+ * - Moves media fields under `media` key for media blocks.
+ * - Flattens contexts and ensures correct JSON structure for backend.
+ */
+function prepareExportData(course) {
+  // Deep clone.
+  const data = JSON.parse(JSON.stringify(course));
+  // Nest media blocks.
+  data.section_groups.forEach(group => {
+    group.sections.forEach(section => {
+      section.steps.forEach(step => {
+        step.block_groups = step.block_groups || [];
+        step.stepBlockGroups?.forEach(bg => {
+          bg.blocks.forEach(block => {
+            // Consolidate media fields under a single 'media' object for export.
+            if (block.type === 'media' && block.url !== undefined && block.mediaType !== undefined) {
+              block.media = { url: block.url, type: block.mediaType };
+              delete block.url;
+              delete block.mediaType;
+            }
           });
         });
       });
-      // Helper to snake_case keys
-      function snake(obj) {
-        if (Array.isArray(obj)) return obj.map(snake);
-        if (obj && typeof obj === 'object') {
-          const result = {};
-          Object.entries(obj).forEach(([k, v]) => {
-            let key = k;
-            const map = {
-              mediaUrl: 'media_url',
-              mediaType: 'media_type',
-              activityId: 'activity_id',
-              teacherOnly: 'teacher_only',
-              stepBlockGroups: 'block_groups'
-            };
-            if (map[k]) key = map[k];
-            result[key] = snake(v);
-          });
-          return result;
-        }
-        return obj;
-      }
-      const finalData = snake(data);
-      // Remove empty step types
-      finalData.section_groups.forEach(g => {
-        g.sections.forEach(sec => {
-          sec.steps.forEach(st => {
-            if (!st.type) delete st.type;
-          });
-        });
+    });
+  });
+  // Helper to snake_case keys.
+  function snake(obj) {
+    if (Array.isArray(obj)) return obj.map(snake);
+    if (obj && typeof obj === 'object') {
+      const result = {};
+      Object.entries(obj).forEach(([k, v]) => {
+        let key = k;
+        const map = {
+          mediaUrl: 'media_url',
+          mediaType: 'media_type',
+          activityId: 'activity_id',
+          teacherOnly: 'teacher_only',
+          stepBlockGroups: 'block_groups'
+        };
+        if (map[k]) key = map[k];
+        result[key] = snake(v);
       });
-      // Transform contexts to match expected JSON schema
-      if (
-        finalData.scoring &&
-        Array.isArray(finalData.scoring.criteria)
-      ) {
-        finalData.scoring.criteria.forEach(crit => {
-          if (crit.contexts) {
-            crit.contexts = crit.contexts.map(ctx => {
-              const out = {
-                type: ctx.memberKey === 'checkpoints' ? 'checkpoint' : 'activity'
-              };
-              if (ctx.title) out.title = ctx.title;
-
-              if (ctx.memberKey === 'checkpoints') {
-                out.checkpoints = ctx.members || [];
-              } else {
-                // If there are multiple activities, emit 'activities' array
-                if (ctx.members && ctx.members.length > 1) {
-                  out.activities = ctx.members;
-                }
-                // Always emit the first as singular 'activity' if present
-                if (ctx.members && ctx.members[0]) {
-                  out.activity = ctx.members[0];
-                }
-              }
-              return out;
-            });
+      return result;
+    }
+    return obj;
+  }
+  const finalData = snake(data);
+  // Remove empty step types.
+  finalData.section_groups.forEach(g => {
+    g.sections.forEach(sec => {
+      sec.steps.forEach(st => {
+        if (!st.type) delete st.type;
+      });
+    });
+  });
+  // Transform contexts to match expected JSON schema.
+  if (
+    finalData.scoring &&
+    Array.isArray(finalData.scoring.criteria)
+  ) {
+    finalData.scoring.criteria.forEach(crit => {
+      if (crit.contexts) {
+        crit.contexts = crit.contexts.map(ctx => {
+          const out = {
+            type: ctx.memberKey === 'checkpoints' ? 'checkpoint' : 'activity'
+          };
+          if (ctx.title) out.title = ctx.title;
+          if (ctx.memberKey === 'checkpoints') {
+            out.checkpoints = ctx.members || [];
+          } else {
+            // If there are multiple activities, emit 'activities' array.
+            if (ctx.members && ctx.members.length > 1) {
+              out.activities = ctx.members;
+            }
+            // Always emit the first as singular 'activity' if present.
+            if (ctx.members && ctx.members[0]) {
+              out.activity = ctx.members[0];
+            }
           }
+          return out;
         });
       }
-      return finalData;
-    }
+    });
+  }
+  return finalData;
+}
 
 
 
 
-    /**
-     * Converts all snake_case keys in an object (including deeply nested structures)
-     * to camelCase for use in the in-browser editor. Also converts 'block_groups' → 'stepBlockGroups'.
-     */
-    // Convert snake_case keys back to camelCase (and block_groups→stepBlockGroups)
-    function snakeToCamel(obj) {
-      if (Array.isArray(obj)) return obj.map(snakeToCamel);
-      if (obj && typeof obj === 'object') {
-        const result = {};
-        Object.entries(obj).forEach(([key, value]) => {
-          // Map snake_case to camelCase
-          let newKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
-          // Special case: convert 'block_groups' to 'stepBlockGroups' to match internal format
-          if (newKey === 'blockGroups') newKey = 'stepBlockGroups';
-          result[newKey] = snakeToCamel(value);
-        });
-        return result;
-      }
-      return obj;
-    }
+/**
+ * Converts all snake_case keys in an object (including deeply nested structures)
+ * to camelCase for use in the in-browser editor. Also converts 'block_groups' to 'stepBlockGroups'.
+ */
+function snakeToCamel(obj) {
+  if (Array.isArray(obj)) return obj.map(snakeToCamel);
+  if (obj && typeof obj === 'object') {
+    const result = {};
+    Object.entries(obj).forEach(([key, value]) => {
+      // Map snake_case to camelCase.
+      let newKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+      // Special case: convert 'block_groups' to 'stepBlockGroups' to match internal format.
+      if (newKey === 'blockGroups') newKey = 'stepBlockGroups';
+      result[newKey] = snakeToCamel(value);
+    });
+    return result;
+  }
+  return obj;
+}
 
-    // Centralized full render routine
-    function fullRender() {
-      initCourseDetails();
-      renderRubric();
-      renderSectionGroups();
-      renderScoring();
-      renderActivities();
-      // Rebind header toggles
-      document.querySelectorAll('.card-header').forEach(h =>
-        h.addEventListener('click', () => h.nextElementSibling.classList.toggle('hidden'))
-      );
-      // Ensure all panels are open
-      document.querySelectorAll('.card-body').forEach(el => el.classList.remove('hidden'));
-    }
+// Centralized full render routine.
+function fullRender() {
+  initCourseDetails();
+  renderRubric();
+  renderSectionGroups();
+  renderScoring();
+  renderActivities();
+  // Rebind header toggles.
+  document.querySelectorAll('.card-header').forEach(h =>
+    h.addEventListener('click', () => h.nextElementSibling.classList.toggle('hidden'))
+  );
+  // Ensure all panels are open.
+  document.querySelectorAll('.card-body').forEach(el => el.classList.remove('hidden'));
+}
 
 document.getElementById('import-json-header').addEventListener('change', event => {
   const file = event.target.files[0];
@@ -708,32 +725,31 @@ document.getElementById('import-json-header').addEventListener('change', event =
   reader.readAsText(file);
 });
 
-    // Export the entire curriculum as a JSON file
-    document.getElementById('export-json-header').addEventListener('click', () => {
-      const data = JSON.stringify(prepareExportData(course), null, 2);
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const rawTitle = document.getElementById('course-title').value || course.title || 'curriculum';
-      const filename = rawTitle.trim().replace(/\s+/g, '_') + '.json';
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+// Export the entire curriculum as a JSON file.
+document.getElementById('export-json-header').addEventListener('click', () => {
+  const data = JSON.stringify(prepareExportData(course), null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const rawTitle = document.getElementById('course-title').value || course.title || 'curriculum';
+  const filename = rawTitle.trim().replace(/\s+/g, '_') + '.json';
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
-
-    // Keep activities in sync
-    function syncActivities() {
-      const ids = new Set();
-      course.section_groups.forEach(g => g.sections.forEach(sec => sec.steps.forEach(st => {
-        if (st.activityId) ids.add(st.activityId);
-      })));
-      ids.forEach(id => { if (!course.activities[id]) course.activities[id] = {}; });
-      Object.keys(course.activities).forEach(id => {
-        if (!ids.has(id)) delete course.activities[id];
-      });
-    }
+// Keep activities in sync with section groups.
+function syncActivities() {
+  const ids = new Set();
+  course.section_groups.forEach(g => g.sections.forEach(sec => sec.steps.forEach(st => {
+    if (st.activityId) ids.add(st.activityId);
+  })));
+  ids.forEach(id => { if (!course.activities[id]) course.activities[id] = {}; });
+  Object.keys(course.activities).forEach(id => {
+    if (!ids.has(id)) delete course.activities[id];
+  });
+}
 
     /**
      * Renders scoring criteria for the course, including components and context mappings.
@@ -1326,68 +1342,84 @@ document.body.addEventListener('click', e => {
   }
 });
 
-    // Helpers for blocks UI
-    // Generic helper: adds a labeled single-line input field to the container
-    function addField(container, labelText, obj, prop) {
-      const fg = document.createElement('div'); fg.className = 'field-group';
-      const lbl = document.createElement('label'); lbl.textContent = labelText;
-      const inp = document.createElement('input'); inp.type = 'text'; inp.value = obj[prop] || '';
-      inp.addEventListener('input', () => obj[prop] = inp.value);
-      fg.append(lbl, inp); container.append(fg);
-    }
+// Helpers for blocks UI.
+// Generic helper: adds a labeled single-line input field to the container.
+function addField(container, labelText, obj, prop) {
+  const fg = document.createElement('div');
+  fg.className = 'field-group';
+  const lbl = document.createElement('label');
+  lbl.textContent = labelText;
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.value = obj[prop] || '';
+  inp.addEventListener('input', () => obj[prop] = inp.value);
+  fg.append(lbl, inp);
+  container.append(fg);
+}
 
-    // Generic helper: adds a labeled textarea to the container
-    function addTextarea(container, labelText, obj, prop) {
-      const fg = document.createElement('div');
-      fg.className = 'field-group';
-      const lbl = document.createElement('label');
-      lbl.textContent = labelText;
-      const ta = document.createElement('textarea');
-      ta.value = obj[prop] || '';
-      ta.addEventListener('input', () => obj[prop] = ta.value);
-      fg.append(lbl, ta);
-      container.append(fg);
-    }
+// Generic helper: adds a labeled textarea to the container.
+function addTextarea(container, labelText, obj, prop) {
+  const fg = document.createElement('div');
+  fg.className = 'field-group';
+  const lbl = document.createElement('label');
+  lbl.textContent = labelText;
+  const ta = document.createElement('textarea');
+  ta.value = obj[prop] || '';
+  ta.addEventListener('input', () => obj[prop] = ta.value);
+  fg.append(lbl, ta);
+  container.append(fg);
+}
 
-    // Generic helper: adds a checkbox with label to the container
-    function addCheckbox(container, labelText, obj, prop) {
-      const fg = document.createElement('div');
-      fg.className = 'field-group';
-      const lbl = document.createElement('label');
-      lbl.textContent = labelText;
-      const chk = document.createElement('input');
-      chk.type = 'checkbox';
-      chk.checked = obj[prop] || false;
-      chk.addEventListener('change', () => obj[prop] = chk.checked);
-      fg.append(lbl, chk);
-      container.append(fg);
-    }
+// Generic helper: adds a checkbox with label to the container.
+function addCheckbox(container, labelText, obj, prop) {
+  const fg = document.createElement('div');
+  fg.className = 'field-group';
+  const lbl = document.createElement('label');
+  lbl.textContent = labelText;
+  const chk = document.createElement('input');
+  chk.type = 'checkbox';
+  chk.checked = obj[prop] || false;
+  chk.addEventListener('change', () => obj[prop] = chk.checked);
+  fg.append(lbl, chk);
+  container.append(fg);
+}
 
-    // Generic helper: adds a labeled dropdown/select menu to the container
-    function addSelect(container, labelText, obj, prop, options) {
-      const fg = document.createElement('div'); fg.className = 'field-group';
-      const lbl = document.createElement('label'); lbl.textContent = labelText;
-      const sel = document.createElement('select');
-      options.forEach(o => { const opt = document.createElement('option'); opt.value = o; opt.textContent = o; sel.append(opt); });
-      sel.value = obj[prop] || options[0];
-      sel.addEventListener('change', () => obj[prop] = sel.value);
-      fg.append(lbl, sel); container.append(fg);
-    }
+// Generic helper: adds a labeled dropdown/select menu to the container.
+function addSelect(container, labelText, obj, prop, options) {
+  const fg = document.createElement('div');
+  fg.className = 'field-group';
+  const lbl = document.createElement('label');
+  lbl.textContent = labelText;
+  const sel = document.createElement('select');
+  options.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o;
+    opt.textContent = o;
+    sel.append(opt);
+  });
+  sel.value = obj[prop] || options[0];
+  sel.addEventListener('change', () => obj[prop] = sel.value);
+  fg.append(lbl, sel);
+  container.append(fg);
+}
 
-    function createMoveDeleteControls(container, arr, idx, renderFn) {
-      const ctrl = document.createElement('div');
-      ['↑','↓','×'].forEach(sym => {
-        const btn = document.createElement('button'); btn.textContent = sym; btn.className = 'move-btn';
-        btn.addEventListener('click', () => {
-          if (sym === '×') arr.splice(idx,1);
-          if (sym === '↑' && idx > 0) [arr[idx-1],arr[idx]]=[arr[idx],arr[idx-1]];
-          if (sym === '↓' && idx < arr.length - 1) [arr[idx+1],arr[idx]]=[arr[idx],arr[idx+1]];
-          renderFn();
-        });
-        ctrl.append(btn);
-      });
-      container.append(ctrl);
-    }
+// Helper to create move/delete controls for array items.
+function createMoveDeleteControls(container, arr, idx, renderFn) {
+  const ctrl = document.createElement('div');
+  ['↑', '↓', '×'].forEach(sym => {
+    const btn = document.createElement('button');
+    btn.textContent = sym;
+    btn.className = 'move-btn';
+    btn.addEventListener('click', () => {
+      if (sym === '×') arr.splice(idx, 1);
+      if (sym === '↑' && idx > 0) [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+      if (sym === '↓' && idx < arr.length - 1) [arr[idx + 1], arr[idx]] = [arr[idx], arr[idx + 1]];
+      renderFn();
+    });
+    ctrl.append(btn);
+  });
+  container.append(ctrl);
+}
 
     function renderBlockGroups(container, step) {
       container.innerHTML = '';
