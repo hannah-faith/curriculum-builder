@@ -23,7 +23,7 @@ body {
 #json-panel {
   position: fixed;
   top: 0;
-  right: -400px;
+  right: -420px;
   width: 400px;
   height: 100%;
   background-color: var(--hw-neutral);
@@ -50,16 +50,16 @@ body {
   right: 0;
   background-color: var(--hw-teal);
   border: none;
-  padding: 8px 16px;
+  padding: 8px 8px;
   cursor: pointer;
   z-index: 1001;
-  border-radius: 4px 0 0 4px;
+  border-radius: 10px 0 0 10px;
   transition: right 0.3s ease;
 }
 
 /* Move button with open panel */
 #json-panel.open + #json-toggle {
-  right: 400px;
+  right: 430px;
 }
 
 /* ===============================
