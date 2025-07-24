@@ -440,7 +440,8 @@ function renderSectionGroups() {
   list.innerHTML = '';
   course.section_groups.forEach((grp, gidx) => {
     // Use createCard helper for the group card
-    const { card, header, body } = createCard(`Group ${gidx+1}`, 'section-group-item');
+    const title = grp.title || '';
+    const { card, header, body } = createCard(`Group ${gidx+1}${title ? ' - ' + title : ''}`, 'section-group-item');
 
     // Title field group for group title
     const fgG = document.createElement('div');
@@ -462,7 +463,8 @@ function renderSectionGroups() {
       // Header
       const secHeader = document.createElement('div');
       secHeader.className = 'card-header section-header sticky';
-      secHeader.textContent = `Section ${sidx+1}`;
+      const title = sec.title || '';
+      secHeader.textContent = `Section ${sidx+1}${title ? ' - ' + title : ''}`;
       secCard.append(secHeader);
       // Title field
       const titleFg = document.createElement('div');
@@ -500,7 +502,8 @@ function renderSectionGroups() {
         stepCard.className = 'step-item card';
         const stepHeader = document.createElement('div');
         stepHeader.className = 'card-header step-header sticky';
-        stepHeader.textContent = `Step ${stidx+1}`;
+        const title = step.title || '';
+        stepHeader.textContent = `Step ${stidx+1}${title ? ' - ' + title : ''}`;
         stepHeader.style.fontWeight = 'bold';
         const stepBody = document.createElement('div');
         stepBody.className = 'card-body';
