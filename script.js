@@ -583,16 +583,16 @@ document.getElementById('add-section-group').addEventListener('click',()=>{cours
  * - Flattens contexts and ensures correct JSON structure for backend.
  */
 function prepareExportData(course) {
-  // Deep clone.
+  // Deep clone
   const data = JSON.parse(JSON.stringify(course));
-  // Nest media blocks.
+
+  // Consolidate media fields for media blocks
   data.section_groups.forEach(group => {
     group.sections.forEach(section => {
       section.steps.forEach(step => {
         step.block_groups = step.block_groups || [];
         step.stepBlockGroups?.forEach(bg => {
           bg.blocks.forEach(block => {
-            // Consolidate media fields under a single 'media' object for export.
             if (block.type === 'media' && block.url !== undefined && block.mediaType !== undefined) {
               block.media = { url: block.url, type: block.mediaType };
               delete block.url;
@@ -603,7 +603,18 @@ function prepareExportData(course) {
       });
     });
   });
-  // Helper to snake_case keys.
+
+  // Move course-level mediaUrl/mediaType into a nested media object before snake casing
+  if (data.mediaUrl) {
+    data.media = {
+      url: data.mediaUrl,
+      type: data.mediaType || 'image'
+    };
+    delete data.mediaUrl;
+    delete data.mediaType;
+  }
+
+  // snake_case transformation helper
   function snake(obj) {
     if (Array.isArray(obj)) return obj.map(snake);
     if (obj && typeof obj === 'object') {
@@ -624,8 +635,26 @@ function prepareExportData(course) {
     }
     return obj;
   }
-  const finalData = snake(data);
-  // Remove empty step types.
+
+  // Transform to snake_case
+  const raw = snake(data);
+
+  // Reorder top-level keys for clean export
+  const finalData = {
+    id: raw.id,
+    name: raw.name,
+    title: raw.title,
+    description: raw.description,
+    vocabulary: raw.vocabulary,
+    media: raw.media,
+    language: raw.language,
+    rubric: raw.rubric,
+    section_groups: raw.section_groups,
+    scoring: raw.scoring,
+    activities: raw.activities
+  };
+
+  // Remove empty step types
   finalData.section_groups.forEach(g => {
     g.sections.forEach(sec => {
       sec.steps.forEach(st => {
@@ -633,11 +662,9 @@ function prepareExportData(course) {
       });
     });
   });
-  // Transform contexts to match expected JSON schema.
-  if (
-    finalData.scoring &&
-    Array.isArray(finalData.scoring.criteria)
-  ) {
+
+  // Transform contexts
+  if (finalData.scoring && Array.isArray(finalData.scoring.criteria)) {
     finalData.scoring.criteria.forEach(crit => {
       if (crit.contexts) {
         crit.contexts = crit.contexts.map(ctx => {
@@ -648,11 +675,9 @@ function prepareExportData(course) {
           if (ctx.memberKey === 'checkpoints') {
             out.checkpoints = ctx.members || [];
           } else {
-            // If there are multiple activities, emit 'activities' array.
             if (ctx.members && ctx.members.length > 1) {
               out.activities = ctx.members;
             }
-            // Always emit the first as singular 'activity' if present.
             if (ctx.members && ctx.members[0]) {
               out.activity = ctx.members[0];
             }
@@ -662,6 +687,7 @@ function prepareExportData(course) {
       }
     });
   }
+
   return finalData;
 }
 
@@ -808,8 +834,8 @@ document.getElementById('import-json-header').addEventListener('change', event =
         name: data.name || '',
         title: data.title || '',
         description: data.description || '',
-        mediaUrl: data.mediaUrl || '',
-        mediaType: data.mediaType || 'image',
+        mediaUrl: data.media?.url || '',
+        mediaType: data.media?.type || 'image',
         language: data.language || 'CoBlocks',
         vocabulary: Array.isArray(data.vocabulary) ? data.vocabulary : [],
         rubric: Array.isArray(data.rubric) ? data.rubric : [],
