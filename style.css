@@ -19,6 +19,49 @@ body {
   color: var(--hw-black);
 }
 
+/* Right-side JSON Preview Panel */
+#json-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100%;
+  background-color: var(--hw-white);
+  border-left: 1px solid #ccc;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  overflow-y: auto;
+  transition: right 0.3s ease;
+  padding: 1rem;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Panel visible state */
+#json-panel.open {
+  right: 0;
+}
+
+/* Toggle Button for JSON Panel */
+#json-toggle {
+  position: fixed;
+  top: 90px;
+  right: 0;
+  background-color: var(--hw-teal);
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  z-index: 1001;
+  border-radius: 4px 0 0 4px;
+  transition: right 0.3s ease;
+}
+
+/* Move button with open panel */
+#json-panel.open + #json-toggle {
+  right: 400px;
+}
+
 /* ===============================
    Fixed Header Styling
    =============================== */

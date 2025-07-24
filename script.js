@@ -123,11 +123,13 @@ function initCourseDetails() {
     inputVocab.style.display = chkVocab.checked ? 'inline-block' : 'none';
     inputVocab.value = chkVocab.checked ? (vocabRaw || DEFAULT_VOCAB_INCLUDE) : '';
     updateVocab();
+    updateJsonPreview();
   });
 
   // Sync input → course.vocabulary
   inputVocab.addEventListener('input', () => {
     updateVocab();
+    updateJsonPreview();
   });
 
   function updateVocab() {
@@ -202,10 +204,34 @@ function initCourseDetails() {
     } else {
       course.teacherGuide = inputLesson.value;
     }
+    updateJsonPreview();
   });
 
   inputLesson.addEventListener('input', () => {
     course.teacherGuide = inputLesson.value;
+    updateJsonPreview();
+  });
+
+  // Register event listeners for course detail fields to keep course object in sync and update JSON preview
+  document.getElementById('course-name').addEventListener('input', (e) => {
+    course.name = e.target.value;
+    updateJsonPreview();
+  });
+  document.getElementById('course-title').addEventListener('input', (e) => {
+    course.title = e.target.value;
+    updateJsonPreview();
+  });
+  document.getElementById('course-description').addEventListener('input', (e) => {
+    course.description = e.target.value;
+    updateJsonPreview();
+  });
+  document.getElementById('media-url').addEventListener('input', (e) => {
+    course.mediaUrl = e.target.value;
+    updateJsonPreview();
+  });
+  document.getElementById('language').addEventListener('change', (e) => {
+    course.language = e.target.value;
+    updateJsonPreview();
   });
 
   fgLesson.append(lblLesson, lessonCheckboxContainer, inputLesson);
@@ -936,6 +962,39 @@ document.getElementById('export-json-header').addEventListener('click', () => {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+});
+
+// JSON Preview Panel Toggle Logic
+const jsonPanel = document.getElementById('json-panel') || document.getElementById('json-preview-panel');
+const toggleJsonBtn = document.getElementById('json-toggle') || document.getElementById('toggle-json-preview');
+
+if (jsonPanel && toggleJsonBtn) {
+  toggleJsonBtn.addEventListener('click', () => {
+    jsonPanel.classList.toggle('open');
+    if (jsonPanel.classList.contains('open')) {
+      toggleJsonBtn.textContent = 'Hide JSON';
+      updateJsonPreview(); // Initial render when opened
+    } else {
+      toggleJsonBtn.textContent = 'Show JSON';
+    }
+  });
+}
+
+function updateJsonPreview() {
+  // Try both possible preview panel IDs
+  const preview = document.getElementById('json-output') || document.getElementById('json-preview');
+  if (!preview) return;
+  const data = JSON.stringify(prepareExportData(course), null, 2);
+  preview.textContent = data;
+}
+
+// Re-render JSON preview on input changes (live update when panel is open)
+document.querySelectorAll('input, select, textarea').forEach(el => {
+  el.addEventListener('input', () => {
+    if (jsonPanel.classList.contains('open')) {
+      updateJsonPreview();
+    }
+  });
 });
 
 // Keep activities in sync with section groups.
@@ -2241,3 +2300,30 @@ function renderBlockList(blkList, bg, step, container) {
   });
   blkList.append(addBlkBtn);
 }
+
+function updateJsonPreview() {
+  const preview = document.getElementById('json-output'); // Updated ID
+  if (!preview) return;
+  try {
+    const fullJson = prepareExportData(course); // Ensure `course` is defined in scope
+    preview.textContent = JSON.stringify(fullJson, null, 2);
+  } catch (err) {
+    preview.textContent = '// Error generating JSON\n// ' + err.message;
+    console.error('Error generating preview JSON:', err);
+  }
+}
+
+function setupJsonPreviewToggle() {
+  const toggle = document.getElementById('toggle-preview'); // Updated ID
+  const panel = document.getElementById('json-panel');      // Updated ID
+  if (!toggle || !panel) return;
+
+  toggle.addEventListener('click', () => {
+    const isOpen = panel.classList.toggle('open');
+    toggle.textContent = isOpen ? 'Hide JSON' : 'Show JSON';
+    if (isOpen) updateJsonPreview();
+  });
+}
+
+// Call this once after page load
+setupJsonPreviewToggle();
