@@ -698,16 +698,19 @@ function prepareExportData(course) {
   data.section_groups.forEach(group => {
     group.sections.forEach(section => {
       section.steps.forEach(step => {
-        step.block_groups = step.block_groups || [];
-        step.stepBlockGroups?.forEach(bg => {
-          bg.blocks.forEach(block => {
-            if (block.type === 'media' && block.url !== undefined && block.mediaType !== undefined) {
-              block.media = { url: block.url, type: block.mediaType };
-              delete block.url;
-              delete block.mediaType;
-            }
-          });
-        });
+        step.block_groups = [];
+(step.stepBlockGroups || []).forEach(bg => {
+  // Push into block_groups so it gets exported
+  step.block_groups.push(bg);
+
+  bg.blocks.forEach(block => {
+    if (block.type === 'media' && block.url !== undefined && block.mediaType !== undefined) {
+      block.media = { url: block.url, type: block.mediaType };
+      delete block.url;
+      delete block.mediaType;
+    }
+  });
+});
       });
     });
   });
