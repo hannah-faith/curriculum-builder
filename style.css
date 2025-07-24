@@ -1,4 +1,6 @@
-/* Hello World Brand Palette */
+/* ===============================
+   Hello World Brand Palette
+   =============================== */
 :root {
   --hw-primary: #5C71F2;
   --hw-primary-light: #7A8DF7;
@@ -17,7 +19,9 @@ body {
   color: var(--hw-black);
 }
 
-/* Fixed header styling for HW palette */
+/* ===============================
+   Fixed Header Styling
+   =============================== */
 .fixed-header {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -42,7 +46,11 @@ body {
   text-transform: uppercase;
 }
 
-/* Ensure header buttons stand out */
+.header-controls > * {
+  margin-left: 0.5rem;
+}
+
+/* Header Button Appearance */
 .fixed-header button {
   background-color: var(--hw-white) !important;
   color: var(--hw-primary) !important;
@@ -53,15 +61,12 @@ body {
   border-color: var(--hw-white) !important;
 }
 
-.header-controls > * {
-  margin-left: 0.5rem;
-}
-/* Push main content below header */
+/* Main Content Spacing */
 .main-content {
   margin-top: 3rem;
 }
 
-/* Style the file input with border and padding */
+/* File Input Styling */
 .file-input-wrapper {
   display: inline-block;
   border-radius: 4px;
@@ -88,7 +93,9 @@ body {
   font-size: 1rem;
 }
 
-/* HWCS Button styling */
+/* ===============================
+   Button Styling
+   =============================== */
 button {
   padding: 6px 12px;
   margin: 2px;
@@ -111,7 +118,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Card headers with brand color */
+/* Card Header Styling */
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -119,12 +126,12 @@ button:disabled {
   color: var(--hw-primary);
 }
 
-/* Card and field-group backgrounds */
+/* Card & Field Group Backgrounds */
 .card, .field-group {
   background-color: var(--hw-white);
 }
 
-/* Inputs and selects styling */
+/* Input, Select, and Textarea Styling */
 input, select, textarea {
   border: 1px solid #ccc;
   background-color: var(--hw-white);
@@ -134,7 +141,9 @@ input:focus, select:focus, textarea:focus {
   outline: 2px solid var(--hw-teal);
 }
 
-/* Tag items */
+/* ===============================
+   Tag Items
+   =============================== */
 .tag-list { display: flex; flex-wrap: wrap; gap: 5px; }
 .tag-item {
   display: flex;
@@ -150,8 +159,9 @@ input:focus, select:focus, textarea:focus {
   border: none;
 }
 
- /* Enhanced field-group for grid layout and spacing */
-/* Enhanced field-group for grid layout and spacing */
+/* ===============================
+   Field Group Layout
+   =============================== */
 .field-group {
   display: grid;
   grid-template-columns: 120px 1fr;
@@ -159,7 +169,7 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
   margin-bottom: 12px;
 }
-/* Style each component entry as a two-column grid */
+/* Component List Grid Layout */
 .component-list li {
   display: grid;
   grid-template-columns: 120px 1fr;
@@ -168,32 +178,33 @@ input:focus, select:focus, textarea:focus {
   padding: 4px 0;
 }
 
-/* Remove the default bullet */
+/* Remove List Bullets */
 .component-list {
   list-style: none;
   padding: 0;
 }
 
-/* Place the move/delete buttons in column 2 */
+/* Move/Delete Buttons Placement */
 .component-list li > .move-btn {
   grid-column: 2;
   justify-self: start;
 }
 
-/* Ensure each inner field-group stays in its own row */
+/* Inner Field Group Display */
 .component-list li .field-group {
   grid-column: 1 / span 2;
   display: contents;
 }
 
-/* Align the “+ Add Component” button into column 2 */
+/* Add Button Positioning */
 .field-group > button {
   grid-column: 2;
   justify-self: start;
 }
 
-/* --- Contexts and Requirements: two-column grid style --- */
-/* Remove bullets and padding from context requirement lists */
+/* ===============================
+   Context & Requirement Lists
+   =============================== */
 .requirements-list,
 .member-list {
   list-style: none;
@@ -201,7 +212,7 @@ input:focus, select:focus, textarea:focus {
   margin: 0;
 }
 
-/* Style each context entry as a two-column grid */
+/* Context Entry Grid Layout */
 .requirements-list li,
 .member-list > div {
   display: grid;
@@ -211,28 +222,28 @@ input:focus, select:focus, textarea:focus {
   padding: 4px 0;
 }
 
-/* Place move/delete buttons in column 2 */
+/* Move/Delete Buttons Placement */
 .requirements-list li > .move-btn,
 .member-list > div > button {
   grid-column: 2;
   justify-self: start;
 }
 
-/* Ensure each inner field-group in context entries stays full-width */
+/* Inner Field Group Display */
 .requirements-list li .field-group,
 .member-list > div .field-group {
   grid-column: 1 / span 2;
   display: contents;
 }
 
-/* Align the “+ Add Context” button under the input column */
+/* Add Button Positioning */
 .field-group > .requirements-list + button,
 .field-group > .member-list + button {
   grid-column: 2;
   justify-self: start;
   margin-top: 8px;
 }
-/* Align labels to the end of the first grid column */
+/* Label Alignment */
 .field-group > label {
   grid-column: 1;
   justify-self: end;
@@ -240,7 +251,7 @@ input:focus, select:focus, textarea:focus {
   font-weight: 500;
 }
 
-/* Ensure all form controls live in the second column and align to the start */
+/* Form Control Alignment */
 .field-group > input,
 .field-group > select,
 .field-group > textarea,
@@ -268,14 +279,16 @@ input:focus, select:focus, textarea:focus {
 .section-item, .rubric-item, .step-item { background: #f9f9f9; margin-bottom: 8px; padding: 8px; border-radius: 4px; }
 .move-btn { margin: 0 2px; }
 
-/* Compact card spacing for tighter layout */
+/* ===============================
+   Card Styling
+   =============================== */
 .card {
   border: 1px solid #ccc;
   border-radius: 4px;
   margin: 8px 0;
   padding: 8px;
 }
-/* Indent any card nested inside another card */
+/* Nested Card Indentation */
 .step-item.card > .block-group-item.card {
   margin-left: 20px !important;
   width: calc(100% - 20px) !important;
@@ -296,7 +309,9 @@ input:focus, select:focus, textarea:focus {
 
 .hidden { display: none; }
 
-/* Responsive support for narrow screens */
+/* ===============================
+   Responsive Layout
+   =============================== */
 @media (max-width: 600px) {
   .field-group {
     flex-direction: column;
@@ -309,7 +324,7 @@ input:focus, select:focus, textarea:focus {
   }
 }
 
-/* Ensure nested containers stack, fill available width, and indent */
+/* Nested Container Layout */
 .question-container,
 .choices-container,
 .explanation-container,
@@ -321,7 +336,7 @@ input:focus, select:focus, textarea:focus {
   padding-left: 20px;
 }
 
-/* Compact remove buttons in context and member lists */
+/* Compact Remove Buttons */
 .requirements-list li button[type="button"],
 .member-list > div button[type="button"] {
   flex: 0 0 auto;
@@ -330,7 +345,7 @@ input:focus, select:focus, textarea:focus {
   font-size: 1rem;
 }
 
-/* Make textareas in checkpoint sub-cards full width */
+/* Checkpoint Subcard Textareas */
 .question-item.card .field-group > textarea,
 .choice-item.card .field-group > textarea,
 .explanation-item.card .field-group > textarea {
@@ -345,7 +360,7 @@ input:focus, select:focus, textarea:focus {
   width: 100%;
 }
 
-/* Make “+ Add …” buttons only as wide as their content */
+/* Add Button Sizing */
 .question-container > button,
 .choices-container > button,
 .explanation-container > button {
@@ -353,7 +368,7 @@ input:focus, select:focus, textarea:focus {
   width: auto;
 }
 
-/* Compact certain inputs/selects to ~30ch width */
+/* Compact Field Widths */
 #course-name,
 #course-title,
 #media-url,
@@ -366,7 +381,7 @@ input:focus, select:focus, textarea:focus {
   max-width: 30ch;
 }
 
-/* Ensure block-type field groups stack vertically */
+/* Vertical Stack for Type Fields */
 .field-group.type-fields {
   display: flex !important;
   flex-direction: column !important;
@@ -377,7 +392,7 @@ input:focus, select:focus, textarea:focus {
   width: 100%;
 }
 
-/* Stack question-part fields vertically and allow full-width controls */
+/* Question Builder Layout */
 .field-group.qb-fields {
   display: flex !important;
   flex-direction: column !important;
@@ -388,13 +403,14 @@ input:focus, select:focus, textarea:focus {
   width: 100% !important;
 }
 
-/* Allow specific field-groups to align items to the text baseline */
+/* Baseline Alignment Support */
 .field-group.align-baseline {
   align-items: baseline !important;
 }
 
-/* Hierarchy background tints for nested cards */
-
+/* ===============================
+   Hierarchy Tinting
+   =============================== */
 .section-group-item.card {
   background-color: var(--hw-neutral);
 }
@@ -412,80 +428,82 @@ input:focus, select:focus, textarea:focus {
   background-color: var(--hw-white);
 }
 
-/* Remove white background from all primary fields in Group, Section, and Step cards */
+/* Transparent Primary Fields */
 .step-item.card > .card-body > .field-group,
 .section-group-item.card > .card-body > .field-group:first-child,
 .section-item.card > .field-group {
   background-color: transparent;
 }
 
-    /* Remove default bullets */
-    .requirements-list,
-    .member-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
+/* Reaffirm List Styling for Requirements & Members */
+.requirements-list,
+.member-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
 
-    /* Make the context list and member list align under the input column */
-    .field-group > .requirements-list,
-    .field-group > .member-list {
-      grid-column: 2;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+/* Make the context list and member list align under the input column */
+.field-group > .requirements-list,
+.field-group > .member-list {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-    /* Each context entry mirrors component entry grid */
-    .requirements-list li,
-    .member-list > div {
-      display: grid;
-      grid-template-columns: 120px 1fr;
-      column-gap: 8px;
-      align-items: center;
-    }
+/* Each context entry mirrors component entry grid */
+.requirements-list li,
+.member-list > div {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  column-gap: 8px;
+  align-items: center;
+}
 
-    /* Context Type and Title fields align in grid */
-    .requirements-list li > .field-group,
-    .member-list > div > .field-group {
-      grid-column: 1 / span 2;
-      display: contents;
-    }
+/* Context Type and Title fields align in grid */
+.requirements-list li > .field-group,
+.member-list > div > .field-group {
+  grid-column: 1 / span 2;
+  display: contents;
+}
 
-    /* Activity dropdown fixed width */
-    .member-list > div > select {
-      min-width: 20ch !important;
-      max-width: 20ch !important;
-    }
+/* Member Dropdown Width */
+.member-list > div > select {
+  min-width: 20ch !important;
+  max-width: 20ch !important;
+}
 
-    /* Remove “×” from same row as select—put it in its own row */
-    .member-list > div > button {
-      grid-column: 2;
-      justify-self: start;
-      width: 2ch !important;
-      padding: 4px !important;
-      font-size: 1rem !important;
-      margin-left: 4px;
-    }
+/* Remove Button Placement */
+.member-list > div > button {
+  grid-column: 2;
+  justify-self: start;
+  width: 2ch !important;
+  padding: 4px !important;
+  font-size: 1rem !important;
+  margin-left: 4px;
+}
 
-    /* “+ Add Activity” on its own line, same as components */
-    .member-list > button {
-      grid-column: 2;
-      justify-self: start;
-      margin-top: 8px;
-      min-width: 140px;
-      font-size: 1rem !important;
-      display: inline-block;
-    }
+/* Add Activity Button Layout */
+.member-list > button {
+  grid-column: 2;
+  justify-self: start;
+  margin-top: 8px;
+  min-width: 140px;
+  font-size: 1rem !important;
+  display: inline-block;
+}
 
-/* 8. Base typography */
+/* ===============================
+   Base Typography
+   =============================== */
 body {
   font-family: sans-serif;
   font-size: 16px;
   line-height: 1.5;
 }
 
-/* 1 & 2. Soft shadows and consistent radii/padding */
+/* Box Shadows & Border Radii */
 .card {
   border-radius: 4px;
   padding: 8px;
@@ -496,23 +514,23 @@ body {
   padding: 4px 0;
 }
 
-/* 6. Subtle hover on list rows */
+/* Hover States for Lists */
 .component-list li:hover,
 .requirements-list li:hover {
   background-color: rgba(0, 0, 0, 0.02);
 }
 
-/* 3. Card header (no chevron indicator) */
+/* Card Header Interaction */
 .card-header {
   cursor: pointer;
 }
 
-/* 4. Highlight active panel */
+/* Active Card Highlight */
 .active-card {
   border: 2px solid var(--hw-teal);
 }
 
-/* drag handle style */
+/* Drag Handle Styling */
 .drag-handle {
   cursor: grab;
   color: var(--hw-primary);
@@ -523,7 +541,9 @@ body {
   vertical-align: middle;
 }
 
-/* Highlight each requirement block and set grid for draggable area */
+/* ===============================
+   Rubric Requirement Layout
+   =============================== */
 /* Rubric requirements: 4-column, 3-row grid for label/input/audio/url/delete */
 .requirements-list li {
   display: grid;
@@ -537,9 +557,7 @@ body {
   padding: 4px;
 }
 
-/* Remove old grid placement rules for rubric requirements; new rules below */
-
-/* hide list-style on Dragula’s mirror element */
+/* Dragula Mirror Styling */
 .gu-mirror {
   list-style: none !important;
 }
@@ -549,10 +567,7 @@ body {
   list-style: none !important;
 }
 
-/* Place Include Audio inline in second column */
-
-
-/* ----------- Rubric requirement grid placement ----------- */
+/* Rubric Grid Placement Rules */
 /* Text row */
 .requirements-list li > .text-label {
   grid-column: 2;
@@ -596,8 +611,7 @@ body {
   box-sizing: border-box;
 }
 
-
-/* Stronger typography for all card headers */
+/* Card Header Typography */
 .card-header {
   text-transform: uppercase;
   letter-spacing: 0.05em;
