@@ -275,7 +275,12 @@ input:focus, select:focus, textarea:focus {
   flex: 1 1 100%;
   box-sizing: border-box;
 }
-.section-list, .requirements-list, .step-list { margin-left: 20px; margin-bottom: 8px; }
+
+.section-list {
+  margin-left: 0px;
+}
+
+.requirements-list, .step-list { margin-left: 10px; margin-bottom: 8px; }
 .section-item, .rubric-item, .step-item { background: #f9f9f9; margin-bottom: 8px; padding: 8px; border-radius: 4px; }
 .move-btn { margin: 0 2px; }
 
