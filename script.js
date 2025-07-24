@@ -57,6 +57,13 @@ function initCourseDetails() {
   document.getElementById('course-description').innerHTML = course.description;
   document.getElementById('media-url').value = course.mediaUrl;
   document.getElementById('language').value = course.language;
+// Ensure the Description input spans the full width of its container
+// This code runs after the DOM is loaded (initCourseDetails is called in fullRender)
+// Find the input for course description and set its width to 100%
+const descInput = document.getElementById('course-description');
+if (descInput && descInput.type === 'text') {
+  descInput.style.width = '100%';
+}
   refreshVocabList();
 
   // --- Vocabulary checkbox and input logic ---
