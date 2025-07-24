@@ -58,27 +58,97 @@ function initCourseDetails() {
   document.getElementById('media-url').value = course.mediaUrl;
   document.getElementById('language').value = course.language;
   refreshVocabList();
+
+  // --- Vocabulary checkbox and input logic ---
+  // Find the Course Details card container
+  const cardBody = document.querySelector('#course-details-card .card-body');
+  if (!cardBody) return;
+  // Remove existing vocab field-group if present (idempotent)
+  let existingVocab = cardBody.querySelector('.field-group.vocab-checkbox-group');
+  if (existingVocab) existingVocab.remove();
+
+  // Vocabulary checkbox and input
+  const fgVocab = document.createElement('div');
+  fgVocab.className = 'field-group vocab-checkbox-group';
+  fgVocab.style.display = 'grid';
+  fgVocab.style.gridTemplateColumns = '120px min-content 1fr';
+  fgVocab.style.alignItems = 'start';
+  fgVocab.style.columnGap = '10px';
+
+  // Column 1: label
+  const lblVocab = document.createElement('label');
+  lblVocab.textContent = 'Vocabulary';
+  lblVocab.style.gridColumn = '1';
+  lblVocab.style.marginRight = '0';
+
+  // Column 2: checkbox
+  const vocabCheckboxContainer = document.createElement('div');
+  vocabCheckboxContainer.style.gridColumn = '2';
+  vocabCheckboxContainer.style.display = 'flex';
+  vocabCheckboxContainer.style.justifyContent = 'flex-start';
+  vocabCheckboxContainer.style.alignItems = 'flex-start';
+  vocabCheckboxContainer.style.textAlign = 'left';
+  const chkVocab = document.createElement('input');
+  chkVocab.type = 'checkbox';
+  // Style the checkbox to align left and to the top
+  chkVocab.style.justifySelf = 'start';
+  chkVocab.style.alignSelf = 'start';
+  chkVocab.style.marginLeft = '0';
+  vocabCheckboxContainer.appendChild(chkVocab);
+
+  // Column 3: input
+  const inputVocab = document.createElement('input');
+  inputVocab.type = 'text';
+  inputVocab.style.gridColumn = '3';
+  inputVocab.style.flex = '1 1 300px';
+  inputVocab.style.minWidth = '200px';
+
+  const DEFAULT_VOCAB_INCLUDE = '#include(course://vocabulary.json)';
+
+  // Initial import
+  const vocabRaw = course.vocabulary && typeof course.vocabulary === 'string' ? course.vocabulary : '';
+  chkVocab.checked = !!vocabRaw;
+  inputVocab.value = chkVocab.checked ? (vocabRaw || DEFAULT_VOCAB_INCLUDE) : '';
+  inputVocab.style.display = chkVocab.checked ? 'inline-block' : 'none';
+
+  // Sync checkbox → input
+  chkVocab.addEventListener('change', () => {
+    inputVocab.style.display = chkVocab.checked ? 'inline-block' : 'none';
+    inputVocab.value = chkVocab.checked ? (vocabRaw || DEFAULT_VOCAB_INCLUDE) : '';
+    updateVocab();
+  });
+
+  // Sync input → course.vocabulary
+  inputVocab.addEventListener('input', () => {
+    updateVocab();
+  });
+
+  function updateVocab() {
+    if (chkVocab.checked) {
+      course.vocabulary = inputVocab.value;
+    } else {
+      delete course.vocabulary;
+    }
+  }
+
+  // Layout: label (col1), checkbox (col2), input (col3)
+  fgVocab.append(lblVocab, vocabCheckboxContainer, inputVocab);
+  // Insert after the field-group for 'Language'
+  const languageField = Array.from(cardBody.querySelectorAll('.field-group')).find(fg =>
+    fg.querySelector('label') && fg.querySelector('label').textContent === 'Language'
+  );
+  if (languageField && languageField.nextSibling) {
+    cardBody.insertBefore(fgVocab, languageField.nextSibling);
+  } else {
+    cardBody.appendChild(fgVocab);
+  }
 }
 
-// Refresh the vocabulary tag list in the UI.
+// Refresh the vocabulary tag list in the UI. (Legacy tag UI removed)
 function refreshVocabList() {
+  // No-op or could hide the legacy tag-list if present
   const list = document.getElementById('vocabulary-list');
-  list.innerHTML = '';
-  course.vocabulary.forEach((tag, i) => {
-    const div = document.createElement('div');
-    div.className = 'tag-item';
-    const input = document.createElement('input');
-    input.value = tag;
-    input.addEventListener('input', () => course.vocabulary[i] = input.value);
-    const btn = document.createElement('button');
-    btn.textContent = '×';
-    btn.addEventListener('click', () => {
-      course.vocabulary.splice(i, 1);
-      refreshVocabList();
-    });
-    div.append(input, btn);
-    list.appendChild(div);
-  });
+  if (list) list.innerHTML = '';
 }
 
 // Helper: Create a standard card with header and body (body visible by default).
@@ -502,7 +572,7 @@ function renderSectionGroups() {
   renderActivities();
 }
 
-document.getElementById('add-vocab-button').addEventListener('click',()=>{course.vocabulary.push('');refreshVocabList();});
+// Legacy vocab tag button removed
 document.getElementById('add-rubric-item').addEventListener('click',()=>{course.rubric.push({id:genUUID(),type:'',title:'',requirements:[]});renderRubric();});
 document.getElementById('add-section-group').addEventListener('click',()=>{course.section_groups.push({id:genUUID(),title:'',sections:[]});renderSectionGroups();});
 
