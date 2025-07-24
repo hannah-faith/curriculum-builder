@@ -57,13 +57,13 @@ function initCourseDetails() {
   document.getElementById('course-description').innerHTML = course.description;
   document.getElementById('media-url').value = course.mediaUrl;
   document.getElementById('language').value = course.language;
-// Ensure the Description input spans the full width of its container
-// This code runs after the DOM is loaded (initCourseDetails is called in fullRender)
-// Find the input for course description and set its width to 100%
-const descInput = document.getElementById('course-description');
-if (descInput && descInput.type === 'text') {
-  descInput.style.width = '100%';
-}
+  // Ensure the Description input spans the full width of its container
+  // This code runs after the DOM is loaded (initCourseDetails is called in fullRender)
+  // Find the input for course description and set its width to 100%
+  const descInput = document.getElementById('course-description');
+  if (descInput && descInput.type === 'text') {
+    descInput.style.width = '100%';
+  }
   refreshVocabList();
 
   // --- Vocabulary checkbox and input logic ---
@@ -149,6 +149,67 @@ if (descInput && descInput.type === 'text') {
   } else {
     cardBody.appendChild(fgVocab);
   }
+
+  // --- Lesson Plan (Teacher Guide) checkbox and input logic ---
+  // Remove existing lesson plan field-group if present (idempotent)
+  let existingLesson = cardBody.querySelector('.field-group.lesson-checkbox-group');
+  if (existingLesson) existingLesson.remove();
+
+  const fgLesson = document.createElement('div');
+  fgLesson.className = 'field-group lesson-checkbox-group';
+  fgLesson.style.display = 'grid';
+  fgLesson.style.gridTemplateColumns = '120px min-content 1fr';
+  fgLesson.style.alignItems = 'start';
+  fgLesson.style.columnGap = '10px';
+
+  // Column 1: label
+  const lblLesson = document.createElement('label');
+  lblLesson.textContent = 'Lesson Plan';
+  lblLesson.style.gridColumn = '1';
+
+  // Column 2: checkbox
+  const lessonCheckboxContainer = document.createElement('div');
+  lessonCheckboxContainer.style.gridColumn = '2';
+  lessonCheckboxContainer.style.display = 'flex';
+  lessonCheckboxContainer.style.justifyContent = 'flex-start';
+  lessonCheckboxContainer.style.alignItems = 'flex-start';
+  lessonCheckboxContainer.style.textAlign = 'left';
+  const chkLesson = document.createElement('input');
+  chkLesson.type = 'checkbox';
+  chkLesson.style.justifySelf = 'start';
+  chkLesson.style.alignSelf = 'start';
+  chkLesson.style.marginLeft = '0';
+  lessonCheckboxContainer.appendChild(chkLesson);
+
+  // Column 3: input
+  const inputLesson = document.createElement('input');
+  inputLesson.type = 'text';
+  inputLesson.placeholder = 'https://drive.google.com/...';
+  inputLesson.style.gridColumn = '3';
+  inputLesson.style.flex = '1 1 300px';
+  inputLesson.style.minWidth = '200px';
+
+  const initialLessonValue = typeof course.teacherGuide === 'string' ? course.teacherGuide : '';
+  chkLesson.checked = !!initialLessonValue;
+  inputLesson.value = initialLessonValue;
+  inputLesson.style.display = chkLesson.checked ? 'inline-block' : 'none';
+
+  chkLesson.addEventListener('change', () => {
+    inputLesson.style.display = chkLesson.checked ? 'inline-block' : 'none';
+    if (!chkLesson.checked) {
+      delete course.teacherGuide;
+      inputLesson.value = '';
+    } else {
+      course.teacherGuide = inputLesson.value;
+    }
+  });
+
+  inputLesson.addEventListener('input', () => {
+    course.teacherGuide = inputLesson.value;
+  });
+
+  fgLesson.append(lblLesson, lessonCheckboxContainer, inputLesson);
+  cardBody.appendChild(fgLesson);
 }
 
 // Refresh the vocabulary tag list in the UI. (Legacy tag UI removed)
@@ -653,6 +714,7 @@ function prepareExportData(course) {
     title: raw.title,
     description: raw.description,
     vocabulary: raw.vocabulary,
+    teacher_guide: raw.teacherGuide,
     media: raw.media,
     language: raw.language,
     rubric: raw.rubric,
@@ -841,6 +903,7 @@ document.getElementById('import-json-header').addEventListener('change', event =
         name: data.name || '',
         title: data.title || '',
         description: data.description || '',
+        teacherGuide: data.teacherGuide || data.teacher_guide || '',
         mediaUrl: data.media?.url || '',
         mediaType: data.media?.type || 'image',
         language: data.language || 'CoBlocks',
