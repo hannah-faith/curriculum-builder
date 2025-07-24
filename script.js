@@ -1507,7 +1507,7 @@ function renderBlockList(blkList, bg, step, container) {
     // Block Type Selector
     addSelect(blkBody, 'Type', blk, 'type', [
       'text', 'label', 'exemplar',
-      'code', 'media', 'checkpoint', 'artifacts', 'rubric', 'framed-text', 'framed-table'
+      'code', 'media', 'checkpoint', 'artifacts', 'rubric', 'framed-text', 'framed-table', 'vocabulary'
     ]);
     // Make the Type dropdown narrower
     const lastSel = blkBody.querySelectorAll('select');
@@ -1914,15 +1914,15 @@ function renderBlockList(blkList, bg, step, container) {
             tagDiv.append(input, delBtn);
             catsContainer.append(tagDiv);
           });
-          const addCatBtn = document.createElement('button');
-          addCatBtn.type = 'button';
-          addCatBtn.textContent = '+ Add Category';
-          addCatBtn.style.minWidth = '140px';
-          addCatBtn.addEventListener('click', () => {
-            blk.categories.push('');
+          const addVocabCatBtn = document.createElement('button');
+          addVocabCatBtn.type = 'button';
+          addVocabCatBtn.textContent = '+ Add Category';
+          addVocabCatBtn.style.minWidth = '140px';
+          addVocabCatBtn.addEventListener('click', () => {
+            blk.categories.push({ id: genUUID(), terms: [] });
             renderBlockTypeFields();
           });
-          fgCats.append(labelCats, catsContainer, addCatBtn);
+          fgCats.append(labelCats, catsContainer, addVocabCatBtn);
           typeFields.append(fgCats);
           break;
         case 'rubric':
@@ -1979,6 +1979,76 @@ function renderBlockList(blkList, bg, step, container) {
             renderSectionGroups();
           });
           typeFields.append(rowContainer, addRowBtn);
+          break;
+        case 'vocabulary':
+          addField(typeFields, 'Title', blk, 'title');
+          blk.categories = blk.categories || [];
+          const vocabContainer = document.createElement('div');
+          vocabContainer.className = 'vocab-container';
+          blk.categories.forEach((cat, cidx) => {
+            const catCard = document.createElement('div');
+            catCard.className = 'card';
+            const catHeader = document.createElement('div');
+            catHeader.className = 'card-header';
+            catHeader.textContent = `Category ${cidx + 1}`;
+            catCard.append(catHeader);
+
+            const catBody = document.createElement('div');
+            catBody.className = 'card-body';
+
+            const fgID = document.createElement('div');
+            fgID.className = 'field-group';
+            const lblID = document.createElement('label');
+            lblID.textContent = 'Category ID';
+            const inputID = document.createElement('input');
+            inputID.type = 'text';
+            inputID.value = cat.id || '';
+            inputID.addEventListener('input', () => cat.id = inputID.value);
+            fgID.append(lblID, inputID);
+            catBody.append(fgID);
+
+            const termList = document.createElement('div');
+            termList.className = 'tag-list';
+            cat.terms = cat.terms || [];
+            cat.terms.forEach((term, tidx) => {
+              const termDiv = document.createElement('div');
+              termDiv.className = 'tag-item';
+              const input = document.createElement('input');
+              input.type = 'text';
+              input.value = term;
+              input.addEventListener('input', () => cat.terms[tidx] = input.value);
+              const delBtn = document.createElement('button');
+              delBtn.type = 'button';
+              delBtn.textContent = '×';
+              delBtn.addEventListener('click', () => {
+                cat.terms.splice(tidx, 1);
+                renderBlockTypeFields();
+              });
+              termDiv.append(input, delBtn);
+              termList.append(termDiv);
+            });
+            const addTermBtn = document.createElement('button');
+            addTermBtn.type = 'button';
+            addTermBtn.textContent = '+ Add Term';
+            addTermBtn.style.minWidth = '140px';
+            addTermBtn.addEventListener('click', () => {
+              cat.terms.push('');
+              renderBlockTypeFields();
+            });
+            catBody.append(termList, addTermBtn);
+            catCard.append(catBody);
+            createMoveDeleteControls(catCard, blk.categories, cidx, renderSectionGroups);
+            vocabContainer.append(catCard);
+          });
+          const addCatBtn = document.createElement('button');
+          addCatBtn.type = 'button';
+          addCatBtn.textContent = '+ Add Category';
+          addCatBtn.addEventListener('click', e => {
+            e.preventDefault();
+            blk.categories.push({ id: '', terms: [] });
+            renderSectionGroups();
+          });
+          typeFields.append(vocabContainer, addCatBtn);
           break;
       }
       // --- END COPY OF SWITCH LOGIC ---
