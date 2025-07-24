@@ -1565,9 +1565,11 @@ function renderBlockList(blkList, bg, step, container) {
 
       // Insert type-specific UI for checkpoint before questionBlocks rendering
       if (blk.type === 'checkpoint') {
-        // Question input
-        addField(typeFields, 'Question', blk, 'question');
-
+        // --- Legacy question migration ---
+        if (blk.question && (!blk.questionBlocks || blk.questionBlocks.length === 0)) {
+          blk.questionBlocks = [{ type: 'text', text: blk.question }];
+          delete blk.question;
+        }
         // Correct / Incorrect Text
         addField(typeFields, 'Correct Text', blk, 'correct_text');
         addField(typeFields, 'Incorrect Text', blk, 'incorrect_text');
