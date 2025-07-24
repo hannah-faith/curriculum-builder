@@ -1421,611 +1421,545 @@ function createMoveDeleteControls(container, arr, idx, renderFn) {
   container.append(ctrl);
 }
 
-    function renderBlockGroups(container, step) {
-      container.innerHTML = '';
-      step.stepBlockGroups = step.stepBlockGroups||[];
-      step.stepBlockGroups.forEach((bg, bidx) => {
-        const bgCard = document.createElement('div'); bgCard.className='block-group-item card';
-        const header = document.createElement('div'); header.className='card-header'; header.textContent=`Block Group ${bidx+1}`;
-        const body = document.createElement('div'); body.className='card-body';
-        bgCard.append(header, body);
+function renderBlockGroups(container, step) {
+  container.innerHTML = '';
+  step.stepBlockGroups = step.stepBlockGroups || [];
+  step.stepBlockGroups.forEach((bg, bidx) => {
+    const bgCard = document.createElement('div');
+    bgCard.className = 'block-group-item card';
+    const header = document.createElement('div');
+    header.className = 'card-header';
+    header.textContent = `Block Group ${bidx + 1}`;
+    // Only append the header (no body)
+    bgCard.appendChild(header);
 
-        const blkList = document.createElement('div'); blkList.className='block-list';
-        bg.blocks = bg.blocks||[];
-        bg.blocks.forEach((blk, bix) => {
-          const blkCard = document.createElement('div'); blkCard.className='block-item card';
-          const blkHeader = document.createElement('div'); blkHeader.className='card-header'; blkHeader.textContent=`Block ${bidx+1}.${bix+1}`;
-          // Insert block move/delete controls in header
-          const blkCtrl = document.createElement('div');
-          ['↑', '↓', '×'].forEach(sym => {
-            const btn = document.createElement('button');
-            btn.textContent = sym;
-            btn.className = 'move-btn';
-            btn.type = 'button';
-            btn.addEventListener('click', () => {
-              if (sym === '×') bg.blocks.splice(bix, 1);
-              if (sym === '↑' && bix > 0) [bg.blocks[bix - 1], bg.blocks[bix]] = [bg.blocks[bix], bg.blocks[bix - 1]];
-              if (sym === '↓' && bix < bg.blocks.length - 1) [bg.blocks[bix + 1], bg.blocks[bix]] = [bg.blocks[bix], bg.blocks[bix + 1]];
+    // Create the block-list and render blocks into it
+    const blkList = document.createElement('div');
+    blkList.className = 'block-list';
+    renderBlockList(blkList, bg, step, container);
+    bgCard.appendChild(blkList);
+
+    container.append(bgCard);
+  });
+}
+
+// Helper: renders the list of blocks for a block group into blkList
+function renderBlockList(blkList, bg, step, container) {
+  blkList.innerHTML = '';
+  bg.blocks = bg.blocks || [];
+  bg.blocks.forEach((blk, bix) => {
+    const blkCard = document.createElement('div');
+    blkCard.className = 'block-item card';
+    const blkHeader = document.createElement('div');
+    blkHeader.className = 'card-header';
+    blkHeader.textContent = `Block ${bg.index !== undefined ? bg.index + 1 : ''}${bix + 1}`;
+    // Insert block move/delete controls in header
+    const blkCtrl = document.createElement('div');
+    ['↑', '↓', '×'].forEach(sym => {
+      const btn = document.createElement('button');
+      btn.textContent = sym;
+      btn.className = 'move-btn';
+      btn.type = 'button';
+      btn.addEventListener('click', () => {
+        if (sym === '×') bg.blocks.splice(bix, 1);
+        if (sym === '↑' && bix > 0) [bg.blocks[bix - 1], bg.blocks[bix]] = [bg.blocks[bix], bg.blocks[bix - 1]];
+        if (sym === '↓' && bix < bg.blocks.length - 1) [bg.blocks[bix + 1], bg.blocks[bix]] = [bg.blocks[bix], bg.blocks[bix + 1]];
+        renderSectionGroups();
+      });
+      blkCtrl.appendChild(btn);
+    });
+    blkHeader.appendChild(blkCtrl);
+    const blkBody = document.createElement('div');
+    blkBody.className = 'card-body';
+    blkCard.append(blkHeader, blkBody);
+
+    // Block Type Selector
+    addSelect(blkBody, 'Type', blk, 'type', [
+      'text', 'label', 'exemplar',
+      'code', 'media', 'checkpoint', 'artifacts', 'rubric', 'framed-text', 'framed-table'
+    ]);
+    // Make the Type dropdown narrower
+    const lastSel = blkBody.querySelectorAll('select');
+    const typeSel = lastSel[lastSel.length - 1];
+    typeSel.style.flex = '0 0 12ch';
+
+    // Container for type-specific fields
+    const typeFields = document.createElement('div');
+    typeFields.className = 'field-group type-fields';
+    blkBody.append(typeFields);
+
+    // Render function for fields based on blk.type
+    function renderBlockTypeFields() {
+      // Default hidden checkpoint labels
+      if (blk.type === 'checkpoint') {
+        blk.correct_text = blk.correct_text || 'Correct';
+        blk.incorrect_text = blk.incorrect_text || 'Incorrect';
+        blk.categories = blk.categories || [];
+      }
+      typeFields.innerHTML = '';
+
+      // Optional Audio for block
+      const fgAudio = document.createElement('div');
+      fgAudio.className = 'field-group';
+      const lblAudio = document.createElement('label');
+      lblAudio.textContent = 'Include Audio';
+      const chkAudio = document.createElement('input');
+      chkAudio.type = 'checkbox';
+      chkAudio.checked = blk.audioEnabled || false;
+      chkAudio.style.flex = '0 0 auto';
+      chkAudio.style.marginLeft = '8px';
+      chkAudio.addEventListener('change', () => {
+        blk.audioEnabled = chkAudio.checked;
+        renderBlockTypeFields();
+      });
+      fgAudio.append(lblAudio, chkAudio);
+      typeFields.append(fgAudio);
+
+      if (blk.audioEnabled) {
+        const urlFg = document.createElement('div');
+        urlFg.className = 'field-group';
+        const urlLbl = document.createElement('label');
+        urlLbl.textContent = 'Audio URL';
+        const urlInput = document.createElement('input');
+        urlInput.type = 'text';
+        urlInput.value = blk.audio || '';
+        // full-width styling
+        urlInput.style.display = 'block';
+        urlInput.style.width = '100%';
+        urlInput.style.boxSizing = 'border-box';
+        urlInput.addEventListener('input', () => blk.audio = urlInput.value);
+        urlFg.append(urlLbl, urlInput);
+        typeFields.append(urlFg);
+      }
+
+      // Row: placeholder for checkpoint choices
+      if (blk.type === 'checkpoint') {
+        const choicesContainer = document.createElement('div');
+        choicesContainer.className = 'choices-container';
+        typeFields.append(choicesContainer);
+      }
+
+      // --- keep the rest of the block type rendering code as before ---
+      // (copy all the case logic from the original function here)
+      // ... (for brevity, not repeating the entire switch/case here, but it should be the same as above)
+      // --- BEGIN COPY OF SWITCH LOGIC ---
+      switch (blk.type) {
+        case 'artifacts':
+          addField(typeFields, 'Title', blk, 'title');
+          const artRowContainer = document.createElement('div');
+          artRowContainer.className = 'artifact-rows';
+          blk.rows = blk.rows || [];
+          blk.rows.forEach((row, ridx) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'artifact-row card';
+            const rowHeader = document.createElement('div');
+            rowHeader.className = 'card-header';
+            rowHeader.textContent = `Row ${ridx + 1}`;
+            rowDiv.append(rowHeader);
+            addField(rowDiv, 'Category', row, 'category');
+            const artList = document.createElement('div');
+            artList.className = 'artifacts-list';
+            row.artifacts = row.artifacts || [];
+            row.artifacts.forEach((art, aidx) => {
+              art.title = art.title || { text: '', url: '' };
+              art.icon = art.icon || { type: 'pdf', url: '' };
+              const artDiv = document.createElement('div');
+              artDiv.className = 'artifact-item card';
+              const artHeader = document.createElement('div');
+              artHeader.className = 'card-header';
+              artHeader.textContent = `Artifact ${aidx + 1}`;
+              artDiv.append(artHeader);
+              addField(artDiv, 'Title Text', art.title, 'text');
+              addField(artDiv, 'Title URL (optional)', art.title, 'url');
+              addField(artDiv, 'Subtitle (optional)', art, 'subtitle');
+              addSelect(artDiv, 'Icon Type (optional)', art.icon, 'type', ['pdf']);
+              addField(artDiv, 'Icon URL (optional)', art.icon, 'url');
+              createMoveDeleteControls(artDiv, row.artifacts, aidx, renderSectionGroups);
+              artList.append(artDiv);
+            });
+            const addArtBtn = document.createElement('button');
+            addArtBtn.type = 'button';
+            addArtBtn.textContent = '+ Add Artifact';
+            addArtBtn.addEventListener('click', e => {
+              e.preventDefault();
+              row.artifacts.push({
+                title: { text: '', url: '' },
+                subtitle: '',
+                icon: { type: 'pdf', url: '' }
+              });
               renderSectionGroups();
             });
-            blkCtrl.appendChild(btn);
+            rowDiv.append(artList, addArtBtn);
+            createMoveDeleteControls(rowDiv, blk.rows, ridx, renderSectionGroups);
+            artRowContainer.append(rowDiv);
           });
-          blkHeader.appendChild(blkCtrl);
-          const blkBody = document.createElement('div'); blkBody.className='card-body';
-          blkCard.append(blkHeader, blkBody);
-
-          // Block Type Selector
-          addSelect(blkBody, 'Type', blk, 'type', [
-            'text','label','exemplar',
-            'code','media','checkpoint','artifacts','rubric','framed-text','framed-table'
+          const addRowBtn2 = document.createElement('button');
+          addRowBtn2.type = 'button';
+          addRowBtn2.textContent = '+ Add Row';
+          addRowBtn2.addEventListener('click', e => {
+            e.preventDefault();
+            blk.rows.push({ category: '', artifacts: [] });
+            renderSectionGroups();
+          });
+          typeFields.append(artRowContainer, addRowBtn2);
+          break;
+        case 'text':
+          const fgVariant = document.createElement('div');
+          fgVariant.className = 'field-group';
+          const lblVar = document.createElement('label');
+          lblVar.textContent = 'Variant';
+          const variantSel = document.createElement('select');
+          ['none', 'numbered', 'lettered'].forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v;
+            opt.textContent = v;
+            variantSel.append(opt);
+          });
+          variantSel.value = blk.variant || 'none';
+          variantSel.style.flex = '0 0 12ch';
+          variantSel.addEventListener('change', () => { blk.variant = variantSel.value; });
+          fgVariant.append(lblVar, variantSel);
+          typeFields.append(fgVariant);
+          const fgText = document.createElement('div');
+          fgText.className = 'field-group';
+          const lblText = document.createElement('label');
+          lblText.textContent = 'Text';
+          const txtArea = document.createElement('textarea');
+          txtArea.value = blk.text || '';
+          txtArea.style.flex = '1 1 100%';
+          txtArea.style.width = '100%';
+          txtArea.addEventListener('input', () => blk.text = txtArea.value);
+          fgText.append(lblText, txtArea);
+          typeFields.append(fgText);
+          break;
+        case 'label':
+          addTextarea(typeFields, 'Text', blk, 'text');
+          addSelect(typeFields, 'Variant', blk, 'variant', ['none', 'exemplar', 'college-board']);
+          break;
+        case 'exemplar':
+          addTextarea(typeFields, 'Text', blk, 'text');
+          delete blk.variant;
+          break;
+        case 'code':
+          addTextarea(typeFields, 'Code', blk, 'code');
+          addSelect(typeFields, 'Variant', blk, 'variant', ['none', 'python', 'java', 'html', 'css', 'console', 'college-board']);
+          break;
+        case 'media':
+          addSelect(typeFields, 'Media Type', blk, 'mediaType', ['image', 'video']);
+          addField(typeFields, 'URL', blk, 'url');
+          const fgH = document.createElement('div');
+          fgH.className = 'field-group';
+          const lblH = document.createElement('label');
+          lblH.textContent = 'Height (px)';
+          const inputH = document.createElement('input');
+          inputH.type = 'number';
+          inputH.value = blk.height ? parseInt(blk.height, 10) : '';
+          inputH.addEventListener('input', () => {
+            blk.height = inputH.value ? inputH.value + 'px' : '';
+          });
+          fgH.append(lblH, inputH);
+          typeFields.append(fgH);
+          break;
+        case 'checkpoint':
+          addSelect(typeFields, 'Variant', blk, 'variant', [
+            'none', 'multiple_choice', 'short_answer', 'rubric', 'link', 'rich_text'
           ]);
-          // Make the Type dropdown narrower
-          const lastSel = blkBody.querySelectorAll('select');
-          const typeSel = lastSel[lastSel.length - 1];
-          typeSel.style.flex = '0 0 12ch';
-
-          // Container for type-specific fields
-          const typeFields = document.createElement('div');
-          typeFields.className = 'field-group type-fields';
-          blkBody.append(typeFields);
-
-          // Render function for fields based on blk.type
-          function renderBlockTypeFields() {
-            // Default hidden checkpoint labels
-            if (blk.type === 'checkpoint') {
-              blk.correct_text = blk.correct_text || 'Correct';
-              blk.incorrect_text = blk.incorrect_text || 'Incorrect';
-              blk.categories = blk.categories || [];
+          blk.questionBlocks = blk.questionBlocks || [];
+          const qContainer = document.createElement('div');
+          qContainer.className = 'question-container';
+          blk.questionBlocks.forEach((qb, qidx) => {
+            const qbDiv = document.createElement('div');
+            qbDiv.className = 'question-item card';
+            const qbHeader = document.createElement('div');
+            qbHeader.className = 'card-header';
+            qbHeader.textContent = `Question Part ${qidx + 1}`;
+            qbDiv.append(qbHeader);
+            addSelect(qbDiv, 'Type', qb, 'type', ['text', 'code', 'media']);
+            const qbFields = document.createElement('div');
+            qbFields.className = 'field-group qb-fields';
+            qbDiv.append(qbFields);
+            function renderQBFields() {
+              qbFields.innerHTML = '';
+              switch (qb.type) {
+                case 'text':
+                  addTextarea(qbFields, 'Text', qb, 'text');
+                  break;
+                case 'code':
+                  addTextarea(qbFields, 'Code', qb, 'code');
+                  addSelect(qbFields, 'Language', qb, 'language', ['python', 'java', 'html', 'css', 'js']);
+                  break;
+                case 'media':
+                  addSelect(qbFields, 'Media Type', qb, 'mediaType', ['image', 'video']);
+                  addField(qbFields, 'URL', qb, 'url');
+                  const fgQH = document.createElement('div');
+                  fgQH.className = 'field-group';
+                  const lblQH = document.createElement('label');
+                  lblQH.textContent = 'Height (px)';
+                  const inputQH = document.createElement('input');
+                  inputQH.type = 'number';
+                  inputQH.value = qb.height ? parseInt(qb.height, 10) : '';
+                  inputQH.addEventListener('input', () => {
+                    qb.height = inputQH.value ? inputQH.value + 'px' : '';
+                  });
+                  fgQH.append(lblQH, inputQH);
+                  qbFields.append(fgQH);
+                  break;
+              }
             }
-            typeFields.innerHTML = '';
-
-            // Optional Audio for block
-            const fgAudio = document.createElement('div');
-            fgAudio.className = 'field-group';
-            const lblAudio = document.createElement('label');
-            lblAudio.textContent = 'Include Audio';
-            const chkAudio = document.createElement('input');
-            chkAudio.type = 'checkbox';
-            chkAudio.checked = blk.audioEnabled || false;
-            chkAudio.style.flex = '0 0 auto';
-            chkAudio.style.marginLeft = '8px';
-            chkAudio.addEventListener('change', () => {
-              blk.audioEnabled = chkAudio.checked;
+            qbDiv.querySelector('select').addEventListener('change', renderQBFields);
+            renderQBFields();
+            const remQB = document.createElement('button');
+            remQB.type = 'button';
+            remQB.textContent = 'Remove Part';
+            remQB.addEventListener('click', () => {
+              blk.questionBlocks.splice(qidx, 1);
+              renderSectionGroups();
+            });
+            qbDiv.append(remQB);
+            qContainer.append(qbDiv);
+          });
+          const addQBBtn = document.createElement('button');
+          addQBBtn.type = 'button';
+          addQBBtn.textContent = '+ Add Question Block';
+          addQBBtn.addEventListener('click', () => {
+            blk.questionBlocks.push({ type: 'text', text: '' });
+            renderSectionGroups();
+          });
+          typeFields.append(qContainer, addQBBtn);
+          const choicesContainer = document.createElement('div');
+          choicesContainer.className = 'choices-container';
+          blk.choices = blk.choices || [];
+          blk.choices.forEach((choice, cidx) => {
+            const choiceDiv = document.createElement('div');
+            choiceDiv.className = 'choice-item card';
+            const choiceHeader = document.createElement('div');
+            choiceHeader.className = 'card-header';
+            choiceHeader.textContent = `Choice ${cidx + 1}`;
+            choiceDiv.append(choiceHeader);
+            const chFields = document.createElement('div');
+            chFields.className = 'field-group type-fields ch-fields';
+            choiceDiv.append(chFields);
+            function renderChFields() {
+              chFields.innerHTML = '';
+              addSelect(chFields, 'Type', choice, 'type', ['text', 'code', 'media']);
+              chFields.querySelector('select').addEventListener('change', renderChFields);
+              switch (choice.type) {
+                case 'text':
+                  addTextarea(chFields, 'Text', choice, 'text');
+                  break;
+                case 'code':
+                  addTextarea(chFields, 'Code', choice, 'code');
+                  addSelect(chFields, 'Language', choice, 'language', ['python', 'java', 'html', 'css', 'js']);
+                  break;
+                case 'media':
+                  addSelect(chFields, 'Media Type', choice, 'mediaType', ['image', 'video']);
+                  addField(chFields, 'URL', choice, 'url');
+                  const fgCH = document.createElement('div');
+                  fgCH.className = 'field-group';
+                  const lblCH = document.createElement('label');
+                  lblCH.textContent = 'Height (px)';
+                  const inputCH = document.createElement('input');
+                  inputCH.type = 'number';
+                  inputCH.value = choice.height ? parseInt(choice.height, 10) : '';
+                  inputCH.addEventListener('input', () => {
+                    choice.height = inputCH.value ? inputCH.value + 'px' : '';
+                  });
+                  fgCH.append(lblCH, inputCH);
+                  chFields.append(fgCH);
+                  break;
+              }
+              addCheckbox(chFields, 'Correct', choice, 'correct');
+            }
+            renderChFields();
+            const remChoiceBtn = document.createElement('button');
+            remChoiceBtn.type = 'button';
+            remChoiceBtn.textContent = 'Remove Choice';
+            remChoiceBtn.addEventListener('click', () => {
+              blk.choices.splice(cidx, 1);
+              renderSectionGroups();
+            });
+            choiceDiv.append(remChoiceBtn);
+            choicesContainer.append(choiceDiv);
+          });
+          const addChoiceBtn = document.createElement('button');
+          addChoiceBtn.type = 'button';
+          addChoiceBtn.textContent = '+ Add Choice';
+          addChoiceBtn.addEventListener('click', () => {
+            blk.choices.push({ type: 'text', text: '', explanation: [] });
+            renderSectionGroups();
+          });
+          typeFields.append(choicesContainer, addChoiceBtn);
+          blk.explanation = blk.explanation || [];
+          const exCont = document.createElement('div');
+          exCont.className = 'explanation-container';
+          blk.explanation.forEach((ex, eidx) => {
+            const exCard = document.createElement('div');
+            exCard.className = 'card';
+            const exHdr = document.createElement('div');
+            exHdr.className = 'card-header';
+            exHdr.textContent = `Explanation ${eidx + 1}`;
+            const exBody = document.createElement('div');
+            exBody.className = 'card-body';
+            exCard.append(exHdr, exBody);
+            addSelect(exBody, 'Type', ex, 'type', ['text', 'media']);
+            function renderExFields() {
+              exBody.querySelectorAll('.field-group:not(:first-child)').forEach(n => n.remove());
+              if (ex.type === 'text') {
+                addTextarea(exBody, 'Text', ex, 'text');
+              } else {
+                addSelect(exBody, 'Media Type', ex, 'mediaType', ['image', 'video']);
+                addField(exBody, 'URL', ex, 'url');
+              }
+            }
+            exCard.querySelector('select').addEventListener('change', renderExFields);
+            renderExFields();
+            const remEx = document.createElement('button');
+            remEx.type = 'button';
+            remEx.textContent = 'Remove Explanation';
+            remEx.addEventListener('click', () => { blk.explanation.splice(eidx, 1); renderSectionGroups(); });
+            exBody.append(remEx);
+            exCont.append(exCard);
+          });
+          const addExBtn = document.createElement('button');
+          addExBtn.type = 'button';
+          addExBtn.textContent = '+ Add Explanation';
+          addExBtn.addEventListener('click', () => {
+            blk.explanation.push({ id: genUUID(), type: 'text', text: '' });
+            renderSectionGroups();
+          });
+          exCont.append(addExBtn);
+          typeFields.append(exCont);
+          addTextarea(typeFields, 'Placeholder', blk, 'placeholder');
+          addTextarea(typeFields, 'Error Message', blk, 'errorMsg');
+          const fgSub = document.createElement('div');
+          fgSub.className = 'field-group';
+          const lblSub = document.createElement('label');
+          lblSub.textContent = 'Is Submission';
+          const chkSub = document.createElement('input');
+          chkSub.type = 'checkbox';
+          chkSub.checked = blk.is_submission || false;
+          chkSub.addEventListener('change', () => { blk.is_submission = chkSub.checked; });
+          fgSub.append(lblSub, chkSub);
+          typeFields.append(fgSub);
+          const fgVal = document.createElement('div');
+          fgVal.className = 'field-group';
+          const lblVal = document.createElement('label');
+          lblVal.textContent = 'Require Validation';
+          const chkVal = document.createElement('input');
+          chkVal.type = 'checkbox';
+          chkVal.checked = blk.requireValidation || false;
+          chkVal.addEventListener('change', () => { blk.requireValidation = chkVal.checked; });
+          fgVal.append(lblVal, chkVal);
+          typeFields.append(fgVal);
+          if (blk.requireValidation) {
+            addField(typeFields, 'Validation URL', blk, 'validationUrl');
+            addSelect(typeFields, 'Validation Variant', blk, 'validationVariant', ['cospaces']);
+          }
+          const fgCats = document.createElement('div');
+          fgCats.className = 'field-group';
+          const labelCats = document.createElement('label');
+          labelCats.textContent = 'Categories';
+          const catsContainer = document.createElement('div');
+          catsContainer.className = 'tag-list';
+          blk.categories.forEach((cat, cidx) => {
+            const tagDiv = document.createElement('div');
+            tagDiv.className = 'tag-item';
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = cat;
+            input.addEventListener('input', () => blk.categories[cidx] = input.value);
+            const delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.textContent = '×';
+            delBtn.addEventListener('click', () => {
+              blk.categories.splice(cidx, 1);
               renderBlockTypeFields();
             });
-            fgAudio.append(lblAudio, chkAudio);
-            typeFields.append(fgAudio);
-
-            if (blk.audioEnabled) {
-              const urlFg = document.createElement('div');
-              urlFg.className = 'field-group';
-              const urlLbl = document.createElement('label');
-              urlLbl.textContent = 'Audio URL';
-              const urlInput = document.createElement('input');
-              urlInput.type = 'text';
-              urlInput.value = blk.audio || '';
-              // full-width styling
-              urlInput.style.display = 'block';
-              urlInput.style.width = '100%';
-              urlInput.style.boxSizing = 'border-box';
-              urlInput.addEventListener('input', () => blk.audio = urlInput.value);
-              urlFg.append(urlLbl, urlInput);
-              typeFields.append(urlFg);
-            }
-
-            // Row: placeholder for checkpoint choices
-            if (blk.type === 'checkpoint') {
-              const choicesContainer = document.createElement('div');
-              choicesContainer.className = 'choices-container';
-              typeFields.append(choicesContainer);
-            }
-
-            switch (blk.type) {
-              case 'artifacts':
-                // Block title
-                addField(typeFields, 'Title', blk, 'title');
-
-                // Rows of artifacts
-                const artRowContainer = document.createElement('div');
-                artRowContainer.className = 'artifact-rows';
-                blk.rows = blk.rows || [];
-                blk.rows.forEach((row, ridx) => {
-                  const rowDiv = document.createElement('div');
-                  rowDiv.className = 'artifact-row card';
-                  const rowHeader = document.createElement('div');
-                  rowHeader.className = 'card-header';
-                  rowHeader.textContent = `Row ${ridx+1}`;
-                  rowDiv.append(rowHeader);
-
-                  // Category field
-                  addField(rowDiv, 'Category', row, 'category');
-
-                  // Artifacts list
-                  const artList = document.createElement('div');
-                  artList.className = 'artifacts-list';
-                  row.artifacts = row.artifacts || [];
-                  row.artifacts.forEach((art, aidx) => {
-                    // Ensure nested objects exist
-                    art.title = art.title || { text: '', url: '' };
-                    art.icon = art.icon || { type: 'pdf', url: '' };
-
-                    const artDiv = document.createElement('div');
-                    artDiv.className = 'artifact-item card';
-                    const artHeader = document.createElement('div');
-                    artHeader.className = 'card-header';
-                    artHeader.textContent = `Artifact ${aidx+1}`;
-                    artDiv.append(artHeader);
-
-                    // Title text & URL
-                    addField(artDiv, 'Title Text', art.title, 'text');
-                    addField(artDiv, 'Title URL (optional)', art.title, 'url');
-
-                    // Subtitle (optional)
-                    addField(artDiv, 'Subtitle (optional)', art, 'subtitle');
-
-                    // Icon type & URL
-                    addSelect(artDiv, 'Icon Type (optional)', art.icon, 'type', ['pdf']);
-                    addField(artDiv, 'Icon URL (optional)', art.icon, 'url');
-
-                    // Move/Delete controls for this artifact
-                    createMoveDeleteControls(artDiv, row.artifacts, aidx, renderSectionGroups);
-
-                    artList.append(artDiv);
-                  });
-
-                  // + Add Artifact button
-                  const addArtBtn = document.createElement('button');
-                  addArtBtn.type = 'button';
-                  addArtBtn.textContent = '+ Add Artifact';
-                  addArtBtn.addEventListener('click', e => {
-                    e.preventDefault();
-                    row.artifacts.push({
-                      title: { text: '', url: '' },
-                      subtitle: '',
-                      icon: { type: 'pdf', url: '' }
-                    });
-                    renderSectionGroups();
-                  });
-
-                  rowDiv.append(artList, addArtBtn);
-
-                  // Move/Delete controls for this row
-                  createMoveDeleteControls(rowDiv, blk.rows, ridx, renderSectionGroups);
-
-                  artRowContainer.append(rowDiv);
-                });
-
-                // + Add Row button
-                const addRowBtn2 = document.createElement('button');
-                addRowBtn2.type = 'button';
-                addRowBtn2.textContent = '+ Add Row';
-                addRowBtn2.addEventListener('click', e => {
-                  e.preventDefault();
-                  blk.rows.push({ category: '', artifacts: [] });
-                  renderSectionGroups();
-                });
-
-                typeFields.append(artRowContainer, addRowBtn2);
-                break;
-              case 'text':
-                // Variant row
-                const fgVariant = document.createElement('div');
-                fgVariant.className = 'field-group';
-                const lblVar = document.createElement('label');
-                lblVar.textContent = 'Variant';
-                const variantSel = document.createElement('select');
-                ['none','numbered','lettered'].forEach(v => {
-                  const opt = document.createElement('option');
-                  opt.value = v;
-                  opt.textContent = v;
-                  variantSel.append(opt);
-                });
-                variantSel.value = blk.variant || 'none';
-                variantSel.style.flex = '0 0 12ch';
-                variantSel.addEventListener('change', () => { blk.variant = variantSel.value; });
-                fgVariant.append(lblVar, variantSel);
-                typeFields.append(fgVariant);
-
-                // Text row (full-width)
-                const fgText = document.createElement('div');
-                fgText.className = 'field-group';
-                const lblText = document.createElement('label');
-                lblText.textContent = 'Text';
-                const txtArea = document.createElement('textarea');
-                txtArea.value = blk.text || '';
-                txtArea.style.flex = '1 1 100%';
-                txtArea.style.width = '100%';
-                txtArea.addEventListener('input', () => blk.text = txtArea.value);
-                fgText.append(lblText, txtArea);
-                typeFields.append(fgText);
-
-                break;
-              case 'label':
-                addTextarea(typeFields, 'Text', blk, 'text');
-                addSelect(typeFields, 'Variant', blk, 'variant', ['none','exemplar','college-board']);
-                break;
-              case 'exemplar':
-                addTextarea(typeFields, 'Text', blk, 'text');
-                delete blk.variant;
-                break;
-              case 'code':
-                addTextarea(typeFields, 'Code', blk, 'code');
-                addSelect(typeFields, 'Variant', blk, 'variant', ['none','python','java','html','css','console','college-board']);
-                break;
-              case 'media':
-                addSelect(typeFields, 'Media Type', blk, 'mediaType', ['image','video']);
-                addField(typeFields, 'URL', blk, 'url');
-                // Optional height (px) field
-                const fgH = document.createElement('div');
-                fgH.className = 'field-group';
-                const lblH = document.createElement('label');
-                lblH.textContent = 'Height (px)';
-                const inputH = document.createElement('input');
-                inputH.type = 'number';
-                // Initialize value without 'px'
-                inputH.value = blk.height ? parseInt(blk.height, 10) : '';
-                inputH.addEventListener('input', () => {
-                  blk.height = inputH.value ? inputH.value + 'px' : '';
-                });
-                fgH.append(lblH, inputH);
-                typeFields.append(fgH);
-                break;
-              case 'checkpoint':
-                // Variant
-                addSelect(typeFields, 'Variant', blk, 'variant', [
-                  'none','multiple_choice','short_answer','rubric','link','rich_text'
-                ]);
-
-                // Dynamic Question Blocks
-                blk.questionBlocks = blk.questionBlocks || [];
-                const qContainer = document.createElement('div');
-                qContainer.className = 'question-container';
-                blk.questionBlocks.forEach((qb, qidx) => {
-                  const qbDiv = document.createElement('div');
-                  qbDiv.className = 'question-item card';
-                  const qbHeader = document.createElement('div');
-                  qbHeader.className = 'card-header';
-                  qbHeader.textContent = `Question Part ${qidx+1}`;
-                  qbDiv.append(qbHeader);
-
-                  // Type selector
-                  addSelect(qbDiv, 'Type', qb, 'type', ['text','code','media']);
-
-                  // Container for fields
-                  const qbFields = document.createElement('div');
-                  qbFields.className = 'field-group qb-fields';
-                  qbDiv.append(qbFields);
-
-                  // Render fields based on type
-                  function renderQBFields() {
-                    qbFields.innerHTML = '';
-                    switch(qb.type) {
-                      case 'text':
-                        addTextarea(qbFields, 'Text', qb, 'text');
-                        break;
-                      case 'code':
-                        addTextarea(qbFields, 'Code', qb, 'code');
-                        addSelect(qbFields, 'Language', qb, 'language', ['python','java','html','css','js']);
-                        break;
-                      case 'media':
-                        addSelect(qbFields, 'Media Type', qb, 'mediaType', ['image','video']);
-                        addField(qbFields, 'URL', qb, 'url');
-                        // Optional height (px) field for question media
-                        const fgQH = document.createElement('div');
-                        fgQH.className = 'field-group';
-                        const lblQH = document.createElement('label');
-                        lblQH.textContent = 'Height (px)';
-                        const inputQH = document.createElement('input');
-                        inputQH.type = 'number';
-                        inputQH.value = qb.height ? parseInt(qb.height, 10) : '';
-                        inputQH.addEventListener('input', () => {
-                          qb.height = inputQH.value ? inputQH.value + 'px' : '';
-                        });
-                        fgQH.append(lblQH, inputQH);
-                        qbFields.append(fgQH);
-                        break;
-                    }
-                  }
-                  // Bind and initial render
-                  qbDiv.querySelector('select').addEventListener('change', renderQBFields);
-                  renderQBFields();
-
-                  // Remove Part button
-                  const remQB = document.createElement('button');
-                  remQB.type = 'button';
-                  remQB.textContent = 'Remove Part';
-                  remQB.addEventListener('click', () => {
-                    blk.questionBlocks.splice(qidx, 1);
-                    renderSectionGroups();
-                  });
-                  qbDiv.append(remQB);
-                  qContainer.append(qbDiv);
-                });
-                const addQBBtn = document.createElement('button');
-                addQBBtn.type = 'button';
-                addQBBtn.textContent = '+ Add Question Block';
-                addQBBtn.addEventListener('click', () => {
-                  blk.questionBlocks.push({ type: 'text', text: '' });
-                  renderSectionGroups();
-                });
-                typeFields.append(qContainer, addQBBtn);
-
-              // Choices with correct checkbox (NO per-choice explanations)
-              const choicesContainer = document.createElement('div');
-              choicesContainer.className = 'choices-container';
-              blk.choices = blk.choices || [];
-              blk.choices.forEach((choice, cidx) => {
-                const choiceDiv = document.createElement('div');
-                choiceDiv.className = 'choice-item card';
-                const choiceHeader = document.createElement('div');
-                choiceHeader.className = 'card-header';
-                choiceHeader.textContent = `Choice ${cidx+1}`;
-                choiceDiv.append(choiceHeader);
-
-                // Container for fields (including Type dropdown)
-                const chFields = document.createElement('div');
-                chFields.className = 'field-group type-fields ch-fields';
-                choiceDiv.append(chFields);
-
-                // Render choice fields
-                function renderChFields() {
-                  chFields.innerHTML = '';
-                  // Row 1: Type selector
-                  addSelect(chFields, 'Type', choice, 'type', ['text','code','media']);
-                  chFields.querySelector('select').addEventListener('change', renderChFields);
-
-                  // Rows based on choice type
-                  switch (choice.type) {
-                    case 'text':
-                      addTextarea(chFields, 'Text', choice, 'text');
-                      break;
-                    case 'code':
-                      addTextarea(chFields, 'Code', choice, 'code');
-                      addSelect(chFields, 'Language', choice, 'language', ['python','java','html','css','js']);
-                      break;
-                    case 'media':
-                      addSelect(chFields, 'Media Type', choice, 'mediaType', ['image','video']);
-                      addField(chFields, 'URL', choice, 'url');
-                      const fgCH = document.createElement('div');
-                      fgCH.className = 'field-group';
-                      const lblCH = document.createElement('label');
-                      lblCH.textContent = 'Height (px)';
-                      const inputCH = document.createElement('input');
-                      inputCH.type = 'number';
-                      inputCH.value = choice.height ? parseInt(choice.height, 10) : '';
-                      inputCH.addEventListener('input', () => {
-                        choice.height = inputCH.value ? inputCH.value + 'px' : '';
-                      });
-                      fgCH.append(lblCH, inputCH);
-                      chFields.append(fgCH);
-                      break;
-                  }
-
-                  // Row 3: Correct checkbox
-                  addCheckbox(chFields, 'Correct', choice, 'correct');
-                }
-                renderChFields();
-
-                // Remove choice
-                const remChoiceBtn = document.createElement('button');
-                remChoiceBtn.type = 'button';
-                remChoiceBtn.textContent = 'Remove Choice';
-                remChoiceBtn.addEventListener('click', () => {
-                  blk.choices.splice(cidx, 1);
-                  renderSectionGroups();
-                });
-                choiceDiv.append(remChoiceBtn);
-
-                choicesContainer.append(choiceDiv);
-              });
-              const addChoiceBtn = document.createElement('button');
-              addChoiceBtn.type = 'button';
-              addChoiceBtn.textContent = '+ Add Choice';
-              addChoiceBtn.addEventListener('click', () => {
-                blk.choices.push({ type:'text', text:'', explanation:[] });
+            tagDiv.append(input, delBtn);
+            catsContainer.append(tagDiv);
+          });
+          const addCatBtn = document.createElement('button');
+          addCatBtn.type = 'button';
+          addCatBtn.textContent = '+ Add Category';
+          addCatBtn.style.minWidth = '140px';
+          addCatBtn.addEventListener('click', () => {
+            blk.categories.push('');
+            renderBlockTypeFields();
+          });
+          fgCats.append(labelCats, catsContainer, addCatBtn);
+          typeFields.append(fgCats);
+          break;
+        case 'rubric':
+          addField(typeFields, 'Title', blk, 'title');
+          break;
+        case 'framed-text':
+          addField(typeFields, 'Title', blk, 'title');
+          addTextarea(typeFields, 'Text', blk, 'text');
+          break;
+        case 'framed-table':
+          addField(typeFields, 'Title', blk, 'title');
+          const rowContainer = document.createElement('div');
+          rowContainer.className = 'framed-table-rows';
+          blk.table = blk.table || [];
+          blk.table.forEach((row, ridx) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'framed-table-row card';
+            const rowHeader = document.createElement('div');
+            rowHeader.className = 'card-header';
+            rowHeader.textContent = `Row ${ridx + 1}`;
+            rowDiv.append(rowHeader);
+            const cellFg = document.createElement('div');
+            cellFg.className = 'field-group';
+            const cellLbl = document.createElement('label');
+            cellLbl.textContent = 'Cell';
+            const cellTa = document.createElement('textarea');
+            cellTa.value = row[0] || '';
+            cellTa.addEventListener('input', () => row[0] = cellTa.value);
+            cellFg.append(cellLbl, cellTa);
+            rowDiv.append(cellFg);
+            const rowCtrl = document.createElement('div');
+            ['↑', '↓', '×'].forEach(sym => {
+              const btn = document.createElement('button');
+              btn.textContent = sym;
+              btn.className = 'move-btn';
+              btn.type = 'button';
+              btn.addEventListener('click', () => {
+                if (sym === '×') blk.table.splice(ridx, 1);
+                if (sym === '↑' && ridx > 0) [blk.table[ridx - 1], blk.table[ridx]] = [blk.table[ridx], blk.table[ridx - 1]];
+                if (sym === '↓' && ridx < blk.table.length - 1) [blk.table[ridx + 1], blk.table[ridx]] = [blk.table[ridx], blk.table[ridx + 1]];
                 renderSectionGroups();
               });
-              typeFields.append(choicesContainer, addChoiceBtn);
-
-                // Explanation (block-level)
-                blk.explanation = blk.explanation || [];
-                const exCont = document.createElement('div');
-                exCont.className = 'explanation-container';
-                blk.explanation.forEach((ex, eidx) => {
-                  const exCard = document.createElement('div');
-                  exCard.className = 'card';
-                  const exHdr = document.createElement('div');
-                  exHdr.className = 'card-header';
-                  exHdr.textContent = `Explanation ${eidx+1}`;
-                  const exBody = document.createElement('div');
-                  exBody.className = 'card-body';
-                  exCard.append(exHdr, exBody);
-
-                  addSelect(exBody, 'Type', ex, 'type', ['text','media']);
-                  function renderExFields() {
-                    exBody.querySelectorAll('.field-group:not(:first-child)').forEach(n => n.remove());
-                    if (ex.type === 'text') {
-                      addTextarea(exBody, 'Text', ex, 'text');
-                    } else {
-                      addSelect(exBody, 'Media Type', ex, 'mediaType', ['image','video']);
-                      addField(exBody, 'URL', ex, 'url');
-                    }
-                  }
-                  exCard.querySelector('select').addEventListener('change', renderExFields);
-                  renderExFields();
-
-                  const remEx = document.createElement('button');
-                  remEx.type = 'button';
-                  remEx.textContent = 'Remove Explanation';
-                  remEx.addEventListener('click', () => { blk.explanation.splice(eidx,1); renderSectionGroups(); });
-                  exBody.append(remEx);
-
-                  exCont.append(exCard);
-                });
-                const addExBtn = document.createElement('button');
-                addExBtn.type = 'button';
-                addExBtn.textContent = '+ Add Explanation';
-                addExBtn.addEventListener('click', () => {
-                  blk.explanation.push({ id: genUUID(), type: 'text', text: '' });
-                  renderSectionGroups();
-                });
-                exCont.append(addExBtn);
-                typeFields.append(exCont);
-
-                // Placeholder and Error Message (unchanged)
-                addTextarea(typeFields, 'Placeholder', blk, 'placeholder');
-                addTextarea(typeFields, 'Error Message', blk, 'errorMsg');
-
-                // Is Submission
-                const fgSub = document.createElement('div');
-                fgSub.className = 'field-group';
-                const lblSub = document.createElement('label');
-                lblSub.textContent = 'Is Submission';
-                const chkSub = document.createElement('input');
-                chkSub.type = 'checkbox';
-                chkSub.checked = blk.is_submission || false;
-                chkSub.addEventListener('change', () => { blk.is_submission = chkSub.checked; });
-                fgSub.append(lblSub, chkSub);
-                typeFields.append(fgSub);
-
-                // Require Validation
-                const fgVal = document.createElement('div');
-                fgVal.className = 'field-group';
-                const lblVal = document.createElement('label');
-                lblVal.textContent = 'Require Validation';
-                const chkVal = document.createElement('input');
-                chkVal.type = 'checkbox';
-                chkVal.checked = blk.requireValidation || false;
-                chkVal.addEventListener('change', () => { blk.requireValidation = chkVal.checked; });
-                fgVal.append(lblVal, chkVal);
-                typeFields.append(fgVal);
-                if (blk.requireValidation) {
-                  addField(typeFields, 'Validation URL', blk, 'validationUrl');
-                  addSelect(typeFields, 'Validation Variant', blk, 'validationVariant', ['cospaces']);
-                }
-                // Categories (free-form tags)
-                const fgCats = document.createElement('div');
-                fgCats.className = 'field-group';
-                const labelCats = document.createElement('label');
-                labelCats.textContent = 'Categories';
-                const catsContainer = document.createElement('div');
-                catsContainer.className = 'tag-list';
-                blk.categories.forEach((cat, cidx) => {
-                  const tagDiv = document.createElement('div');
-                  tagDiv.className = 'tag-item';
-                  const input = document.createElement('input');
-                  input.type = 'text';
-                  input.value = cat;
-                  input.addEventListener('input', () => blk.categories[cidx] = input.value);
-                  const delBtn = document.createElement('button');
-                  delBtn.type = 'button';
-                  delBtn.textContent = '×';
-                  delBtn.addEventListener('click', () => {
-                    blk.categories.splice(cidx, 1);
-                    renderBlockTypeFields();
-                  });
-                  tagDiv.append(input, delBtn);
-                  catsContainer.append(tagDiv);
-                });
-                const addCatBtn = document.createElement('button');
-                addCatBtn.type = 'button';
-                addCatBtn.textContent = '+ Add Category';
-                addCatBtn.style.minWidth = '140px';
-                addCatBtn.addEventListener('click', () => {
-                  blk.categories.push('');
-                  renderBlockTypeFields();
-                });
-                fgCats.append(labelCats, catsContainer, addCatBtn);
-                typeFields.append(fgCats);
-                break;
-              case 'rubric':
-                // Custom rubric title
-                addField(typeFields, 'Title', blk, 'title');
-                break;
-              case 'framed-text':
-                addField(typeFields, 'Title', blk, 'title');
-                addTextarea(typeFields, 'Text', blk, 'text');
-                break;
-
-              case 'framed-table':
-                // Title field
-                addField(typeFields, 'Title', blk, 'title');
-
-                // Dynamic single-column table rows
-                const rowContainer = document.createElement('div');
-                rowContainer.className = 'framed-table-rows';
-                blk.table = blk.table || [];
-                blk.table.forEach((row, ridx) => {
-                  const rowDiv = document.createElement('div');
-                  rowDiv.className = 'framed-table-row card';
-                  const rowHeader = document.createElement('div');
-                  rowHeader.className = 'card-header';
-                  rowHeader.textContent = `Row ${ridx+1}`;
-                  rowDiv.append(rowHeader);
-
-                  // Cell textarea
-                  const cellFg = document.createElement('div');
-                  cellFg.className = 'field-group';
-                  const cellLbl = document.createElement('label');
-                  cellLbl.textContent = 'Cell';
-                  const cellTa = document.createElement('textarea');
-                  cellTa.value = row[0] || '';
-                  cellTa.addEventListener('input', () => row[0] = cellTa.value);
-                  cellFg.append(cellLbl, cellTa);
-                  rowDiv.append(cellFg);
-
-                  // Move/Delete controls
-                  const rowCtrl = document.createElement('div');
-                  ['↑','↓','×'].forEach(sym => {
-                    const btn = document.createElement('button');
-                    btn.textContent = sym;
-                    btn.className = 'move-btn';
-                    btn.type = 'button';
-                    btn.addEventListener('click', () => {
-                      if (sym === '×') blk.table.splice(ridx, 1);
-                      if (sym === '↑' && ridx > 0) [blk.table[ridx-1], blk.table[ridx]] = [blk.table[ridx], blk.table[ridx-1]];
-                      if (sym === '↓' && ridx < blk.table.length - 1) [blk.table[ridx+1], blk.table[ridx]] = [blk.table[ridx], blk.table[ridx+1]];
-                      renderSectionGroups();
-                    });
-                    rowCtrl.append(btn);
-                  });
-                  rowDiv.append(rowCtrl);
-
-                  rowContainer.append(rowDiv);
-                });
-
-                // Add Row button
-                const addRowBtn = document.createElement('button');
-                addRowBtn.type = 'button';
-                addRowBtn.textContent = '+ Add Row';
-                addRowBtn.addEventListener('click', e => {
-                  e.preventDefault();
-                  blk.table.push(['']);
-                  renderSectionGroups();
-                });
-                typeFields.append(rowContainer, addRowBtn);
-                break;
-            }
-          }
-
-          // Bind and initial render
-          // Find the select element we just created:
-          const typeSelect = typeFields.previousElementSibling.querySelector('select');
-          typeSelect.addEventListener('change', renderBlockTypeFields);
-          renderBlockTypeFields();
-
-          // createMoveDeleteControls(blkBody, bg.blocks, bix, () => renderSectionGroups());
-          blkList.append(blkCard);
-        });
-        const addBlkBtn = document.createElement('button');
-        addBlkBtn.setAttribute('type', 'button');
-        addBlkBtn.textContent='+ Add Block';
-        addBlkBtn.addEventListener('click', e => {
-          e.preventDefault();
-          bg.blocks.push({id:genUUID(),type:'text'});
-          renderSectionGroups();
-        });
-        bgCard.append(blkList, addBlkBtn);
-        container.append(bgCard);
-      });
+              rowCtrl.append(btn);
+            });
+            rowDiv.append(rowCtrl);
+            rowContainer.append(rowDiv);
+          });
+          const addRowBtn = document.createElement('button');
+          addRowBtn.type = 'button';
+          addRowBtn.textContent = '+ Add Row';
+          addRowBtn.addEventListener('click', e => {
+            e.preventDefault();
+            blk.table.push(['']);
+            renderSectionGroups();
+          });
+          typeFields.append(rowContainer, addRowBtn);
+          break;
+      }
+      // --- END COPY OF SWITCH LOGIC ---
     }
+    // Bind and initial render
+    const typeSelect = typeFields.previousElementSibling.querySelector('select');
+    typeSelect.addEventListener('change', renderBlockTypeFields);
+    renderBlockTypeFields();
+    blkList.append(blkCard);
+  });
+  const addBlkBtn = document.createElement('button');
+  addBlkBtn.setAttribute('type', 'button');
+  addBlkBtn.textContent = '+ Add Block';
+  addBlkBtn.addEventListener('click', e => {
+    e.preventDefault();
+    bg.blocks.push({ id: genUUID(), type: 'text' });
+    renderSectionGroups();
+  });
+  blkList.append(addBlkBtn);
+}

@@ -308,6 +308,9 @@ input:focus, select:focus, textarea:focus {
   margin-left: 20px !important;
   width: calc(100% - 20px) !important;
 }
+
+
+
 .card-body {
   padding: 8px;
 }
