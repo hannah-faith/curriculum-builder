@@ -1403,6 +1403,22 @@ document.body.addEventListener('click', e => {
         bg.blocks.forEach((blk, bix) => {
           const blkCard = document.createElement('div'); blkCard.className='block-item card';
           const blkHeader = document.createElement('div'); blkHeader.className='card-header'; blkHeader.textContent=`Block ${bidx+1}.${bix+1}`;
+          // Insert block move/delete controls in header
+          const blkCtrl = document.createElement('div');
+          ['↑', '↓', '×'].forEach(sym => {
+            const btn = document.createElement('button');
+            btn.textContent = sym;
+            btn.className = 'move-btn';
+            btn.type = 'button';
+            btn.addEventListener('click', () => {
+              if (sym === '×') bg.blocks.splice(bix, 1);
+              if (sym === '↑' && bix > 0) [bg.blocks[bix - 1], bg.blocks[bix]] = [bg.blocks[bix], bg.blocks[bix - 1]];
+              if (sym === '↓' && bix < bg.blocks.length - 1) [bg.blocks[bix + 1], bg.blocks[bix]] = [bg.blocks[bix], bg.blocks[bix + 1]];
+              renderSectionGroups();
+            });
+            blkCtrl.appendChild(btn);
+          });
+          blkHeader.appendChild(blkCtrl);
           const blkBody = document.createElement('div'); blkBody.className='card-body';
           blkCard.append(blkHeader, blkBody);
 
@@ -1966,7 +1982,7 @@ document.body.addEventListener('click', e => {
           typeSelect.addEventListener('change', renderBlockTypeFields);
           renderBlockTypeFields();
 
-          createMoveDeleteControls(blkBody, bg.blocks, bix, () => renderSectionGroups());
+          // createMoveDeleteControls(blkBody, bg.blocks, bix, () => renderSectionGroups());
           blkList.append(blkCard);
         });
         const addBlkBtn = document.createElement('button');
