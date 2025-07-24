@@ -250,7 +250,18 @@ function createCard(headerText, additionalClass = '') {
   const card = document.createElement('div');
   card.className = 'card' + (additionalClass ? ' ' + additionalClass : '');
   const header = document.createElement('div');
-  header.className = 'card-header';
+  // Assign class based on headerText for sticky hierarchy
+  if (headerText.startsWith('Group')) {
+    header.className = 'card-header group-header sticky';
+  } else if (headerText.startsWith('Section')) {
+    header.className = 'card-header section-header sticky';
+  } else if (headerText.startsWith('Step')) {
+    header.className = 'card-header step-header sticky';
+  } else if (headerText.startsWith('Block Group')) {
+    header.className = 'card-header blockgroup-header sticky';
+  } else {
+    header.className = 'card-header sticky';
+  }
   header.textContent = headerText;
   const body = document.createElement('div');
   body.className = 'card-body';
@@ -450,7 +461,7 @@ function renderSectionGroups() {
       secCard.className = 'card section-item';
       // Header
       const secHeader = document.createElement('div');
-      secHeader.className = 'card-header';
+      secHeader.className = 'card-header section-header sticky';
       secHeader.textContent = `Section ${sidx+1}`;
       secCard.append(secHeader);
       // Title field
@@ -488,7 +499,7 @@ function renderSectionGroups() {
         const stepCard = document.createElement('div');
         stepCard.className = 'step-item card';
         const stepHeader = document.createElement('div');
-        stepHeader.className = 'card-header';
+        stepHeader.className = 'card-header step-header sticky';
         stepHeader.textContent = `Step ${stidx+1}`;
         stepHeader.style.fontWeight = 'bold';
         const stepBody = document.createElement('div');
@@ -1686,7 +1697,7 @@ function renderBlockGroups(container, step) {
     const bgCard = document.createElement('div');
     bgCard.className = 'block-group-item card';
     const header = document.createElement('div');
-    header.className = 'card-header';
+    header.className = 'card-header blockgroup-header sticky';
     header.textContent = `Block Group ${bidx + 1}`;
     // Only append the header (no body)
     bgCard.appendChild(header);
@@ -1709,7 +1720,7 @@ function renderBlockList(blkList, bg, step, container) {
     const blkCard = document.createElement('div');
     blkCard.className = 'block-item card';
     const blkHeader = document.createElement('div');
-    blkHeader.className = 'card-header';
+    blkHeader.className = 'card-header block-header';
     blkHeader.textContent = `Block ${bg.index !== undefined ? bg.index + 1 : ''}${bix + 1}`;
     // Insert block move/delete controls in header
     const blkCtrl = document.createElement('div');

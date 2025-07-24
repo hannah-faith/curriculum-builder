@@ -681,3 +681,34 @@ body {
   margin-left: 8px;
   line-height: 32px;
 }
+
+/* ===============================
+   Sticky Hierarchical Headers
+   =============================== */
+.group-header.sticky {
+  position: sticky;
+  top: 3.0rem; /* fixed header height */
+  background-color: var(--hw-neutral);
+  z-index: 910;
+}
+
+.section-header.sticky {
+  position: sticky;
+  top: 5.3rem; /* 3.5rem + 2.5rem (Group header) */
+  background-color: var(--hw-primary-tint-5);
+  z-index: 900;
+}
+
+.step-header.sticky {
+  position: sticky;
+  top: 7.6rem; /* 6rem + 2.5rem (Section header) */
+  background-color: var(--hw-primary-tint-10);
+  z-index: 890;
+}
+
+.blockgroup-header.sticky {
+  position: sticky;
+  top: 9.9rem; /* 8.5rem + 2.5rem (Step header) */
+  background-color: var(--hw-primary-tint-15);
+  z-index: 880;
+}
