@@ -697,6 +697,30 @@ document.getElementById('import-json-header').addEventListener('change', event =
           });
         });
       }
+      // --- FLATTEN checkpoint fields inside blocks for proper UI rendering ---
+      (data.sectionGroups || data.section_groups || []).forEach(group => {
+        (group.sections || []).forEach(section => {
+          (section.steps || []).forEach(step => {
+            (step.stepBlockGroups || step.block_groups || []).forEach(bg => {
+              (bg.blocks || []).forEach(block => {
+                if (block.type === 'checkpoint') {
+                  // Ensure defaults for question and feedback text
+                  block.question = block.question || '';
+                  block.correct_text = block.correct_text || '';
+                  block.incorrect_text = block.incorrect_text || '';
+                  // Ensure choices array and each choice has text
+                  block.choices = (block.choices || []).map(choice => ({
+                    id: choice.id || genUUID(),
+                    text: choice.text || '',
+                    correct: !!choice.correct,
+                    type: choice.type || 'text'
+                  }));
+                }
+              });
+            });
+          });
+        });
+      });
       // Rebuild contexts in camel format
       if (data.scoring && Array.isArray(data.scoring.criteria)) {
         data.scoring.criteria = data.scoring.criteria.map(crit => {
@@ -1539,11 +1563,14 @@ function renderBlockList(blkList, bg, step, container) {
         typeFields.append(urlFg);
       }
 
-      // Row: placeholder for checkpoint choices
+      // Insert type-specific UI for checkpoint before questionBlocks rendering
       if (blk.type === 'checkpoint') {
-        const choicesContainer = document.createElement('div');
-        choicesContainer.className = 'choices-container';
-        typeFields.append(choicesContainer);
+        // Question input
+        addField(typeFields, 'Question', blk, 'question');
+
+        // Correct / Incorrect Text
+        addField(typeFields, 'Correct Text', blk, 'correct_text');
+        addField(typeFields, 'Incorrect Text', blk, 'incorrect_text');
       }
 
       // --- keep the rest of the block type rendering code as before ---
