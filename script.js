@@ -294,7 +294,7 @@ function renderSectionGroups() {
         });
         secCtrl.append(btn);
       });
-      secCard.append(secCtrl);
+      secHeader.append(secCtrl);
 
       // Steps List
       sec.steps = sec.steps || [];
@@ -416,7 +416,8 @@ function renderSectionGroups() {
         bgContainer.className = 'block-groups-list';
         step.stepBlockGroups = step.stepBlockGroups || [];
         renderBlockGroups(bgContainer, step);
-        stepCard.append(stepHeader, stepBody, stepCtrl, bgContainer);
+        stepHeader.append(stepCtrl);
+        stepCard.append(stepHeader, stepBody, bgContainer);
 
         // Add Block Group button
         const addBgBtn = document.createElement('button');
@@ -461,18 +462,20 @@ function renderSectionGroups() {
       renderSectionGroups();
     });
     const grpCtrl = document.createElement('div');
-    ['Move Up','Move Down','Delete Group'].forEach(txt => {
+    ['↑','↓','×'].forEach(txt => {
       const btn = document.createElement('button');
       btn.textContent = txt;
+      btn.className = 'move-btn';
       btn.addEventListener('click', () => {
-        if (txt === 'Delete Group') course.section_groups.splice(gidx,1);
-        else if (txt === 'Move Up' && gidx > 0) [course.section_groups[gidx-1],course.section_groups[gidx]] = [course.section_groups[gidx],course.section_groups[gidx-1]];
-        else if (txt === 'Move Down' && gidx < course.section_groups.length-1) [course.section_groups[gidx+1],course.section_groups[gidx]] = [course.section_groups[gidx],course.section_groups[gidx+1]];
+        if (txt === '×') course.section_groups.splice(gidx,1);
+        else if (txt === '↑' && gidx > 0) [course.section_groups[gidx-1],course.section_groups[gidx]] = [course.section_groups[gidx],course.section_groups[gidx-1]];
+        else if (txt === '↓' && gidx < course.section_groups.length-1) [course.section_groups[gidx+1],course.section_groups[gidx]] = [course.section_groups[gidx],course.section_groups[gidx+1]];
         renderSectionGroups();
       });
       grpCtrl.append(btn);
     });
-    body.append(addSecBtn, grpCtrl);
+    header.append(grpCtrl);
+    body.append(addSecBtn);
     list.append(card);
   });
   renderScoring();

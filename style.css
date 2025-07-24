@@ -106,6 +106,9 @@ button:disabled {
 
 /* Card headers with brand color */
 .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   color: var(--hw-primary);
 }
 
