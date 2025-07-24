@@ -245,7 +245,7 @@ function renderSectionGroups() {
   list.innerHTML = '';
   course.section_groups.forEach((grp, gidx) => {
     // Use createCard helper for the group card
-    const { card, header, body } = createCard(`Group ${gidx+1}`);
+    const { card, header, body } = createCard(`Group ${gidx+1}`, 'section-group-item');
 
     // Title field group for group title
     const fgG = document.createElement('div');
@@ -263,11 +263,11 @@ function renderSectionGroups() {
     secList.className = 'section-list';
     grp.sections.forEach((sec, sidx) => {
       const secCard = document.createElement('div');
-      secCard.className = 'section-item';
+      secCard.className = 'card section-item';
       // Header
       const secHeader = document.createElement('div');
+      secHeader.className = 'card-header';
       secHeader.textContent = `Section ${sidx+1}`;
-      secHeader.style.fontWeight = 'bold';
       secCard.append(secHeader);
       // Title field
       const titleFg = document.createElement('div');

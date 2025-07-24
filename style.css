@@ -7,6 +7,9 @@
   --hw-black:   #242424;
   --hw-white:   #FFFFFF;
   --hw-neutral: #F2F2F2;
+  --hw-primary-tint-5:  #EFF1FE;
+  --hw-primary-tint-10: #DDE1FC;
+  --hw-primary-tint-15: #BDC6F9;
 }
 
 body {
@@ -42,10 +45,7 @@ body {
   background-color: var(--hw-neutral) !important;
   border-color: var(--hw-white) !important;
 }
-.header-title {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
+
 .header-controls > * {
   margin-left: 0.5rem;
 }
@@ -106,9 +106,7 @@ button:disabled {
 
 /* Card headers with brand color */
 .card-header {
-  /* background-color: var(--hw-primary); */
   color: var(--hw-primary);
-  padding: 6px;
 }
 
 /* Card and field-group backgrounds */
@@ -268,8 +266,6 @@ input:focus, select:focus, textarea:focus {
   padding: 8px;
 }
 /* Indent any card nested inside another card */
-/* (Removed in favor of more specific rules below) */
-/* Explicit indent for block groups and nested cards */
 .step-item.card > .block-group-item.card {
   margin-left: 20px !important;
   width: calc(100% - 20px) !important;
@@ -387,13 +383,31 @@ input:focus, select:focus, textarea:focus {
   align-items: baseline !important;
 }
 
+/* Hierarchy background tints for nested cards */
 
-</style>
-    <!-- Contexts: present contexts exactly like components -->
-    <style>
-    /* Contexts: present contexts exactly like components */
-    .field-group > label[ for ]:empty + .requirements-list,
-    .field-group > label[ for ]:empty + .member-list {}
+.section-group-item.card {
+  background-color: var(--hw-neutral);
+}
+
+.section-item.card {
+  background-color: var(--hw-primary-tint-5);
+}
+.step-item.card {
+  background-color: var(--hw-primary-tint-10);
+}
+.block-group-item.card {
+  background-color: var(--hw-primary-tint-15);
+}
+.block-item.card {
+  background-color: var(--hw-white);
+}
+
+/* Remove white background from all primary fields in Group, Section, and Step cards */
+.step-item.card > .card-body > .field-group,
+.section-group-item.card > .card-body > .field-group:first-child,
+.section-item.card > .field-group {
+  background-color: transparent;
+}
 
     /* Remove default bullets */
     .requirements-list,
@@ -570,4 +584,16 @@ body {
   grid-row: 3;
   width: 100%;
   box-sizing: border-box;
+}
+
+
+/* Stronger typography for all card headers */
+.card-header {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 1px rgba(0, 0, 0, 0.1);
 }
