@@ -1446,6 +1446,7 @@ function renderActivities() {
       "exit-ticket",
       "lesson-plan",
       "example-project",
+      "html",
       "other"
     ].forEach((t) => {
       const opt = document.createElement("option");
