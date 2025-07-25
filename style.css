@@ -21,19 +21,113 @@ body {
   line-height: 1.5;
 }
 
+/* Layout: Sidebar */
+#sidebar {
+  position: fixed;
+  top: 51px;
+  left: 0;
+  height: 100%;
+  width: 250px;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  background: var(--hw-white);
+  box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+  z-index: 1002;
+  overflow-y: auto;
+  padding-top: 1rem;
+}
+#sidebar.open {
+  transform: translateX(0);
+}
+/* Controls: Sidebar Toggle */
+#sidebar-toggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 105px;
+  left: -2px;
+  width: 10px;
+  height: 30px;
+  background: var(--hw-purple);
+  color: var(--hw-white);
+  font-size: 1rem;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+
+  border: none;
+  border-radius: 0 20px 20px 0;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: transform 0.3s ease, left 0.3s ease;
+  z-index: 1003;
+}
+#sidebar.open ~ #sidebar-toggle {
+  transform: translateY(-50%) rotate(180deg);
+  left: 224px;
+}
+/* Components: Sidebar Nav */
+/* Sidebar Nav List and Spacing/Indentation/Truncation */
+.sidebar-nav ul {
+  list-style: none;
+  padding-left: 10px;
+  margin: 0;
+}
+.sidebar-nav ul ul {
+  padding-left: 2ch;
+  margin: 0;
+}
+.sidebar-nav ul ul ul {
+  padding-left: 2ch;
+  margin: 0;
+}
+.sidebar-nav li {
+  margin: 0.125rem 0;
+}
+.sidebar-nav a {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+.sidebar-nav a {
+  display: block;
+  padding: 0.25rem;
+  color: var(--hw-primary);
+  text-decoration: none;
+  border-radius: 4px;
+}
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+  background: var(--hw-primary-tint-5);
+}
+
+/* Highlight core sidebar items and separate from outline */
+.sidebar-nav > ul > li:nth-child(-n+4) > a {
+  font-weight: 600;
+}
+.sidebar-nav > ul > li:nth-child(4)::after {
+  content: "";
+  display: block;
+  width: calc(100% - 20px);
+  margin: 0.5rem auto;
+  height: 2px;
+  background: var(--hw-primary-light);
+}
+
 /* Layout: JSON Preview Panel */
 #json-panel {
   position: fixed;
   top: 0;
-  right: -420px;
+  right: 0;
   width: 400px;
   height: 100%;
+  transform: translateX(100%);       /* hide off-screen */
+  transition: transform 0.3s ease;
   background-color: var(--hw-neutral);
   border-left: 1px solid #ccc;
-  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
   z-index: 1000;
   overflow-y: auto;
-  transition: right 0.3s ease;
   padding: 1rem;
   font-size: 0.8rem;
   white-space: pre-wrap;
@@ -42,20 +136,21 @@ body {
 
 /* Layout: JSON Panel States */
 #json-panel.open {
-  right: 0;
+  transform: translateX(0);
 }
 
 /* Controls: JSON Panel Toggle */
 #json-toggle {
   position: fixed;
   top: 90px;
-  right: 0;
+  right: -2px;
   background-color: var(--hw-teal);
   border: none;
+  box-shadow: 0px 0 5px rgba(0,0,0,0.1);
   padding: 8px 8px;
   cursor: pointer;
   z-index: 1001;
-  border-radius: 10px 0 0 10px;
+  border-radius: 20px 0 0 20px;
   transition: right 0.3s ease;
 }
 
@@ -107,6 +202,8 @@ body {
 /* Layout: Main Content Spacing */
 .main-content {
   margin-top: 3rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
 }
 
 /* Forms: Custom File Upload */

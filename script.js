@@ -476,6 +476,7 @@ function renderSectionGroups() {
       `Group ${gidx + 1}${title ? " - " + title : ""}`,
       "section-group-item"
     );
+    card.id = `group-${grp.id}`;
 
     // Title field group for group title
     const fgG = document.createElement("div");
@@ -509,6 +510,7 @@ function renderSectionGroups() {
     grp.sections.forEach((sec, sidx) => {
       const secCard = document.createElement("div");
       secCard.className = "card section-item";
+      secCard.id = `section-${sec.id}`;
       // Header
       const secHeader = document.createElement("div");
       secHeader.className = "card-header section-header sticky";
@@ -564,6 +566,7 @@ function renderSectionGroups() {
       sec.steps.forEach((step, stidx) => {
         const stepCard = document.createElement("div");
         stepCard.className = "step-item card";
+        stepCard.id = `step-${step.id}`;
         const stepHeader = document.createElement("div");
         stepHeader.className = "card-header step-header sticky";
         const title = step.title || "";
@@ -752,6 +755,8 @@ function renderSectionGroups() {
   });
   renderScoring();
   renderActivities();
+  // Update sidebar navigation whenever sections/steps change
+  if (typeof renderSidebar === "function") renderSidebar();
 }
 
 // Legacy vocab tag button removed
@@ -1146,6 +1151,68 @@ document.querySelectorAll("input, select, textarea").forEach((el) => {
     }
   });
 });
+
+// Render the sidebar navigation
+function renderSidebar() {
+  const nav = document.getElementById("sidebar-nav");
+  nav.innerHTML = "";
+  const rootUl = document.createElement("ul");
+  // Modified addLink to return li
+  const addLink = (id, label, parent) => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = "#";
+    a.textContent = label;
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    li.appendChild(a);
+    parent.appendChild(li);
+    return li;
+  };
+  // Static sections
+  addLink("course-details-card", "Course Details", rootUl);
+  addLink("rubric-card", "Rubric", rootUl);
+  addLink("section-groups-card", "Section Groups", rootUl);
+  addLink("activities-card", "Activities Mapping", rootUl);
+  // Dynamic groups/sections/steps
+  course.section_groups.forEach((grp, gidx) => {
+    const grpId = `group-${grp.id}`;
+    const grpLabel = grp.title || `Group ${gidx + 1}`;
+    const grpLi = addLink(grpId, grpLabel, rootUl);
+    const subUl = document.createElement("ul");
+    grp.sections.forEach((sec, sidx) => {
+      const secId = `section-${sec.id}`;
+      const secLabel = sec.title || `Section ${sidx + 1}`;
+      const secLi = addLink(secId, secLabel, subUl);
+      // Steps nested under section li
+      if (sec.steps && sec.steps.length > 0) {
+        const stepsUl = document.createElement("ul");
+        sec.steps.forEach((st, tidx) => {
+          const stepId = `step-${st.id}`;
+          const stepLabel = st.title || `Step ${tidx + 1}`;
+          addLink(stepId, stepLabel, stepsUl);
+        });
+        secLi.appendChild(stepsUl);
+      }
+    });
+    grpLi.appendChild(subUl);
+  });
+  nav.appendChild(rootUl);
+}
+// Inject into fullRender
+const originalFull = fullRender;
+fullRender = () => {
+  originalFull();
+  renderSidebar();
+};
+// Sidebar toggle
+const sidebar = document.getElementById("sidebar");
+const toggleBtn = document.getElementById("sidebar-toggle");
+toggleBtn.addEventListener("click", () => sidebar.classList.toggle("open"));
+// Initial build
+document.addEventListener("DOMContentLoaded", renderSidebar);
 
 // Keep activities in sync with section groups.
 function syncActivities() {
