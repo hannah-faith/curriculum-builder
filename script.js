@@ -1045,6 +1045,14 @@ document.getElementById("import-json-header").addEventListener("change", (event)
         scoring: data.scoring || { criteria: [] },
         activities: data.activities || {}
       });
+      // Set step.generateId = true for steps with activityId
+      course.section_groups.forEach((group) =>
+        group.sections.forEach((section) =>
+          section.steps.forEach((step) => {
+            if (step.activityId) step.generateId = true;
+          })
+        )
+      );
       // Re-render immediately
       fullRender();
     } catch (err) {
