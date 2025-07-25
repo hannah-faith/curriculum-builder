@@ -654,6 +654,11 @@ input:focus, select:focus, textarea:focus {
   line-height: 32px;
 }
 
+/* Transparent background for Group-level Teacher Only */
+.section-group-item.card .field-group.align-baseline {
+  background-color: transparent;
+}
+
 /* Sticky Hierarchical Headers */
 .group-header.sticky {
   position: sticky;

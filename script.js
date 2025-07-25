@@ -488,6 +488,21 @@ function renderSectionGroups() {
     fgG.append(labelG, inputG);
     body.append(fgG);
 
+    // Teacher Only at group level
+    const fgGTO = document.createElement("div");
+    fgGTO.className = "field-group align-baseline";
+    const lblGTO = document.createElement("label");
+    lblGTO.textContent = "Teacher Only";
+    const chkGTO = document.createElement("input");
+    chkGTO.type = "checkbox";
+    chkGTO.checked = grp.teacherOnly || false;
+    chkGTO.addEventListener("change", () => {
+      grp.teacherOnly = chkGTO.checked;
+      renderSectionGroups();
+    });
+    fgGTO.append(lblGTO, chkGTO);
+    body.append(fgGTO);
+
     // Sections List
     const secList = document.createElement("div");
     secList.className = "section-list";
@@ -510,6 +525,20 @@ function renderSectionGroups() {
       titleInput.addEventListener("input", () => (sec.title = titleInput.value));
       titleFg.append(titleLabel, titleInput);
       secCard.append(titleFg);
+      // Teacher Only at section level
+      const fgSTO = document.createElement("div");
+      fgSTO.className = "field-group align-baseline";
+      const lblSTO = document.createElement("label");
+      lblSTO.textContent = "Teacher Only";
+      const chkSTO = document.createElement("input");
+      chkSTO.type = "checkbox";
+      chkSTO.checked = sec.teacherOnly || false;
+      chkSTO.addEventListener("change", () => {
+        sec.teacherOnly = chkSTO.checked;
+        renderSectionGroups();
+      });
+      fgSTO.append(lblSTO, chkSTO);
+      secCard.append(fgSTO);
       // Controls
       const secCtrl = document.createElement("div");
       ["↑", "↓", "×"].forEach((sym) => {
