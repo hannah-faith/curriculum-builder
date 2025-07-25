@@ -1,7 +1,5 @@
-/* ===============================
-   Hello World Brand Palette
-   =============================== */
 :root {
+  /* Theme Variables */
   --hw-primary: #5C71F2;
   --hw-primary-light: #7A8DF7;
   --hw-teal:    #66D8E1;
@@ -14,6 +12,7 @@
   --hw-primary-tint-15: #BDC6F9;
 }
 
+/* Base Styles */
 body {
   background-color: var(--hw-neutral);
   color: var(--hw-black);
@@ -22,7 +21,7 @@ body {
   line-height: 1.5;
 }
 
-/* Right-side JSON Preview Panel */
+/* Layout: JSON Preview Panel */
 #json-panel {
   position: fixed;
   top: 0;
@@ -41,12 +40,12 @@ body {
   word-break: break-word;
 }
 
-/* Panel visible state */
+/* Layout: JSON Panel States */
 #json-panel.open {
   right: 0;
 }
 
-/* Toggle Button for JSON Panel */
+/* Controls: JSON Panel Toggle */
 #json-toggle {
   position: fixed;
   top: 90px;
@@ -60,14 +59,12 @@ body {
   transition: right 0.3s ease;
 }
 
-/* Move button with open panel */
+/* Controls: JSON Panel Toggle (Open State) */
 #json-panel.open + #json-toggle {
   right: 430px;
 }
 
-/* ===============================
-   Fixed Header Styling
-   =============================== */
+/* Layout: Fixed Header */
 .fixed-header {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -96,7 +93,7 @@ body {
   margin-left: 0.5rem;
 }
 
-/* Header Button Appearance */
+/* Components: Header Buttons */
 .fixed-header button {
   background-color: var(--hw-white) !important;
   color: var(--hw-primary) !important;
@@ -107,14 +104,12 @@ body {
   border-color: var(--hw-white) !important;
 }
 
-/* Main Content Spacing */
+/* Layout: Main Content Spacing */
 .main-content {
   margin-top: 3rem;
 }
 
-/* File Input Styling */
-/* Custom file upload button to mimic export button */
-/* Custom file upload button to match Export JSON button exactly */
+/* Forms: Custom File Upload */
 .custom-file-upload {
   line-height: normal;
   padding: 6px 12px;
@@ -138,14 +133,12 @@ body {
   display: none;
 }
 
-/* Hide native file input "No file chosen" text */
+/* Forms: Hide Native File Input Text */
 input[type="file"] {
   display: none !important;
 }
 
-/* ===============================
-   Button Styling
-   =============================== */
+/* Components: Global Buttons */
 button {
   padding: 6px 12px;
   margin: 2px;
@@ -168,15 +161,12 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Card Header Styling */
-/* (removed, merged into unified .card-header below) */
-
-/* Card & Field Group Backgrounds */
+/* Components: Cards & Field Groups */
 .card, .field-group {
   background-color: var(--hw-white);
 }
 
-/* Input, Select, and Textarea Styling */
+/* Form Elements: Inputs, Selects, Textareas */
 input, select, textarea {
   border: 1px solid #ccc;
   background-color: var(--hw-white);
@@ -186,9 +176,7 @@ input:focus, select:focus, textarea:focus {
   outline: 2px solid var(--hw-teal);
 }
 
-/* ===============================
-   Tag Items
-   =============================== */
+/* Components: Tag Items */
 .tag-list { display: flex; flex-wrap: wrap; gap: 5px; }
 .tag-item {
   display: flex;
@@ -204,9 +192,7 @@ input:focus, select:focus, textarea:focus {
   border: none;
 }
 
-/* ===============================
-   Field Group Layout
-   =============================== */
+/* Layout Utilities: Field Group Grid */
 .field-group {
   display: grid;
   grid-template-columns: 120px 1fr;
@@ -246,9 +232,7 @@ input:focus, select:focus, textarea:focus {
   justify-self: start;
 }
 
-/* ===============================
-   Context & Requirement Lists
-   =============================== */
+/* Context & Requirement Lists */
 .requirements-list,
 .member-list {
   list-style: none;
@@ -328,9 +312,7 @@ input:focus, select:focus, textarea:focus {
 .section-item, .rubric-item, .step-item { background: #f9f9f9; margin-bottom: 8px; padding: 8px; border-radius: 4px; }
 .move-btn { margin: 0 2px; }
 
-/* ===============================
-   Card Styling
-   =============================== */
+/* Card Styling */
 .card {
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -361,9 +343,7 @@ input:focus, select:focus, textarea:focus {
 
 .hidden { display: none; }
 
-/* ===============================
-   Responsive Layout
-   =============================== */
+/* Responsive Layout */
 @media (max-width: 600px) {
   .field-group {
     flex-direction: column;
@@ -460,9 +440,7 @@ input:focus, select:focus, textarea:focus {
   align-items: baseline !important;
 }
 
-/* ===============================
-   Hierarchy Tinting
-   =============================== */
+/* Hierarchy Tinting */
 .section-group-item.card {
   background-color: var(--hw-neutral);
 }
@@ -546,10 +524,7 @@ input:focus, select:focus, textarea:focus {
   display: inline-block;
 }
 
-/* ===============================
-   Base Typography
-   =============================== */
-/* (removed duplicate body rule and comment) */
+/* Base Typography */
 
 /* Box Shadows & Border Radii */
 .card {
@@ -589,9 +564,7 @@ input:focus, select:focus, textarea:focus {
   vertical-align: middle;
 }
 
-/* ===============================
-   Rubric Requirement Layout
-   =============================== */
+/* Rubric Requirement Layout */
 /* Rubric requirements: 4-column, 3-row grid for label/input/audio/url/delete */
 .requirements-list li {
   display: grid;
@@ -681,9 +654,7 @@ input:focus, select:focus, textarea:focus {
   line-height: 32px;
 }
 
-/* ===============================
-   Sticky Hierarchical Headers
-   =============================== */
+/* Sticky Hierarchical Headers */
 .group-header.sticky {
   position: sticky;
   top: 3.0rem; /* fixed header height */
