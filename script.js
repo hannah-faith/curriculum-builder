@@ -766,6 +766,28 @@ function prepareExportData(course) {
     activities: raw.activities
   };
 
+  // Recursively remove empty values: empty strings, false booleans, empty objects/arrays
+  function pruneEmpty(obj) {
+    if (Array.isArray(obj)) {
+      const arr = obj.map(pruneEmpty).filter(v => v !== undefined);
+      return arr.length ? arr : undefined;
+    } else if (obj && typeof obj === 'object') {
+      const res = {};
+      Object.entries(obj).forEach(([k, v]) => {
+        const pruned = pruneEmpty(v);
+        if (pruned !== undefined) res[k] = pruned;
+      });
+      return Object.keys(res).length ? res : undefined;
+    } else if (typeof obj === 'string') {
+      return obj.trim() ? obj : undefined;
+    } else if (typeof obj === 'boolean') {
+      return obj ? true : undefined;
+    } else if (typeof obj === 'number') {
+      return obj;
+    }
+    return obj != null ? obj : undefined;
+  }
+
   // Remove empty step types
   finalData.section_groups.forEach(g => {
     g.sections.forEach(sec => {
@@ -800,7 +822,9 @@ function prepareExportData(course) {
     });
   }
 
-  return finalData;
+  // Prune out any empty values or containers
+  const prunedData = pruneEmpty(finalData);
+  return prunedData;
 }
 
 
