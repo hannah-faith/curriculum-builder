@@ -1926,6 +1926,24 @@ function renderBlockGroups(container, step) {
     const header = document.createElement("div");
     header.className = "card-header blockgroup-header sticky";
     header.textContent = `Block Group ${bidx + 1}`;
+    // Add move/delete controls for Block Groups
+    const bgCtrl = document.createElement("div");
+    ["↑", "↓", "×"].forEach((sym) => {
+      const btn = document.createElement("button");
+      btn.textContent = sym;
+      btn.className = "move-btn";
+      btn.type = "button";
+      btn.addEventListener("click", () => {
+        const arr = step.stepBlockGroups;
+        if (sym === "×") arr.splice(bidx, 1);
+        else if (sym === "↑" && bidx > 0) [arr[bidx - 1], arr[bidx]] = [arr[bidx], arr[bidx - 1]];
+        else if (sym === "↓" && bidx < arr.length - 1)
+          [arr[bidx + 1], arr[bidx]] = [arr[bidx], arr[bidx + 1]];
+        renderSectionGroups();
+      });
+      bgCtrl.appendChild(btn);
+    });
+    header.appendChild(bgCtrl);
     // Only append the header (no body)
     bgCard.appendChild(header);
 
