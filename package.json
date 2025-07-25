@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "bootstrap-icons": "^1.13.1",
     "dragula": "^3.7.3"
   }
 }

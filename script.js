@@ -1159,7 +1159,7 @@ function renderSidebar() {
   const rootUl = document.createElement("ul");
   // Icon mapping for sidebar items
   const iconMap = {
-    "course-details-card": "bi bi-backpack3",
+    "course-details-card": "bi bi-book",
     "rubric-card": "bi bi-card-checklist",
     "section-groups-card": "bi bi-bar-chart-steps",
     "scoring-card": "bi bi-check-square",
