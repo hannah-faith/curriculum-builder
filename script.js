@@ -2628,8 +2628,4 @@ function setupJsonPreviewToggle() {
   });
 }
 
-// Call this once after page load
 setupJsonPreviewToggle();
-
-const x = 5;
-console.log(x);
