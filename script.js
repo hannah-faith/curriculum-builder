@@ -1157,12 +1157,28 @@ function renderSidebar() {
   const nav = document.getElementById("sidebar-nav");
   nav.innerHTML = "";
   const rootUl = document.createElement("ul");
+  // Icon mapping for sidebar items
+  const iconMap = {
+    "course-details-card": "bi bi-backpack3",
+    "rubric-card": "bi bi-card-checklist",
+    "section-groups-card": "bi bi-bar-chart-steps",
+    "scoring-card": "bi bi-check-square",
+    "activities-card": "bi bi-node-plus"
+  };
   // Modified addLink to return li
   const addLink = (id, label, parent) => {
     const li = document.createElement("li");
     const a = document.createElement("a");
     a.href = "#";
-    a.textContent = label;
+    // Add icon if defined
+    if (iconMap[id]) {
+      const icon = document.createElement("i");
+      icon.className = iconMap[id];
+      icon.style.marginRight = "0.5ch";
+      a.appendChild(icon);
+    }
+    // Add link text
+    a.appendChild(document.createTextNode(label));
     a.addEventListener("click", (e) => {
       e.preventDefault();
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1175,6 +1191,7 @@ function renderSidebar() {
   addLink("course-details-card", "Course Details", rootUl);
   addLink("rubric-card", "Rubric", rootUl);
   addLink("section-groups-card", "Section Groups", rootUl);
+  addLink("scoring-card", "Scoring", rootUl);
   addLink("activities-card", "Activities Mapping", rootUl);
   // Dynamic groups/sections/steps
   course.section_groups.forEach((grp, gidx) => {

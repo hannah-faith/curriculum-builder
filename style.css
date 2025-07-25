@@ -102,10 +102,10 @@ body {
 }
 
 /* Highlight core sidebar items and separate from outline */
-.sidebar-nav > ul > li:nth-child(-n+4) > a {
+.sidebar-nav > ul > li:nth-child(-n+5) > a {
   font-weight: 600;
 }
-.sidebar-nav > ul > li:nth-child(4)::after {
+.sidebar-nav > ul > li:nth-child(5)::after {
   content: "";
   display: block;
   width: calc(100% - 20px);
@@ -783,4 +783,12 @@ input:focus, select:focus, textarea:focus {
   top: 9.9rem; /* 8.5rem + 2.5rem (Step header) */
   background-color: var(--hw-primary-tint-15);
   z-index: 880;
+}
+.sidebar-nav ul ul ul > li > a::before {
+  content: '\25CF';       /* Unicode black circle */
+  display: inline-block;
+  font-size: 0.6em;        /* smaller than text */
+  margin-right: 0.5ch;
+  vertical-align: middle;
+  color: var(--hw-primary);
 }

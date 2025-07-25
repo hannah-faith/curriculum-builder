@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://unpkg.com/dragula/dist/dragula.min.css" />
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" href="favicon-32x32.png" type="image/png" />
+    <link rel="stylesheet" href="node_modules/bootstrap-icons/font/bootstrap-icons.css" />
     <script src="https://kit.fontawesome.com/0b60a3b537.js" crossorigin="anonymous"></script>
   </head>
   <body>
@@ -56,7 +57,12 @@
     <main class="main-content">
       <!-- Course Details -->
       <div class="card" id="course-details-card">
-        <div class="card-header">Course Details</div>
+        <div class="card-header">
+          <span class="header-title">
+            <i class="bi bi-backpack3"></i>
+            Course Details
+          </span>
+        </div>
         <div class="card-body">
           <input type="hidden" id="course-id" />
           <div class="field-group">
@@ -89,7 +95,12 @@
 
       <!-- Rubric Section -->
       <div class="card" id="rubric-card">
-        <div class="card-header">Rubric</div>
+        <div class="card-header">
+          <span class="header-title">
+            <i class="bi bi-card-checklist"></i>
+            Rubric
+          </span>
+        </div>
         <div class="card-body">
           <div id="rubric-list"></div>
           <button id="add-rubric-item" type="button">+ Add Rubric Item</button>
@@ -98,7 +109,12 @@
 
       <!-- Section Groups & Sections -->
       <div class="card" id="section-groups-card">
-        <div class="card-header">Section Groups</div>
+        <div class="card-header">
+          <span class="header-title">
+            <i class="bi bi-bar-chart-steps"></i>
+            Section Groups
+          </span>
+        </div>
         <div class="card-body">
           <div id="section-groups-list"></div>
           <button id="add-section-group" type="button">+ Add Section Group</button>
@@ -107,7 +123,12 @@
 
       <!-- Scoring Section -->
       <div class="card" id="scoring-card">
-        <div class="card-header">Scoring</div>
+        <div class="card-header">
+          <span class="header-title">
+            <i class="bi bi-check-square"></i>
+            Scoring
+          </span>
+        </div>
         <div class="card-body">
           <div id="criteria-list"></div>
           <button id="add-criterion" type="button">+ Add Criterion</button>
@@ -116,7 +137,12 @@
 
       <!-- Activities Mapping -->
       <div class="card" id="activities-card">
-        <div class="card-header">Activities Mapping</div>
+        <div class="card-header">
+          <span class="header-title">
+            <i class="bi bi-node-plus"></i>
+            Activities Mapping
+          </span>
+        </div>
         <div class="card-body">
           <div id="activities-list"></div>
         </div>
