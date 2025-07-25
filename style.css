@@ -17,6 +17,9 @@
 body {
   background-color: var(--hw-neutral);
   color: var(--hw-black);
+  font-family: sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 /* Right-side JSON Preview Panel */
@@ -166,12 +169,7 @@ button:disabled {
 }
 
 /* Card Header Styling */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: var(--hw-primary);
-}
+/* (removed, merged into unified .card-header below) */
 
 /* Card & Field Group Backgrounds */
 .card, .field-group {
@@ -551,11 +549,7 @@ input:focus, select:focus, textarea:focus {
 /* ===============================
    Base Typography
    =============================== */
-body {
-  font-family: sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-}
+/* (removed duplicate body rule and comment) */
 
 /* Box Shadows & Border Radii */
 .card {
@@ -667,6 +661,10 @@ body {
 
 /* Card Header Typography */
 .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--hw-primary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
@@ -674,6 +672,7 @@ body {
   padding: 0.25rem 0.5rem;
   margin-bottom: 0.5rem;
   box-shadow: 0 1px rgba(0,0,0,0.05);
+  cursor: pointer;
 }
 
 /* File name display next to Import button */
