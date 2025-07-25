@@ -850,6 +850,13 @@ function prepareExportData(course) {
     activities: raw.activities
   };
 
+  // Remove explicit 'none' tools
+  if (finalData.activities && typeof finalData.activities === "object") {
+    Object.values(finalData.activities).forEach((act) => {
+      if (act.tool === "none") delete act.tool;
+    });
+  }
+
   // Recursively remove empty values: empty strings, false booleans, empty objects/arrays
   function pruneEmpty(obj) {
     if (Array.isArray(obj)) {
@@ -1477,6 +1484,7 @@ function renderActivities() {
     lblTool.textContent = "Tool";
     const selTool = document.createElement("select");
     [
+      "none",
       "checkpoint-set",
       "cospaces",
       "quiz",
@@ -1509,7 +1517,11 @@ function renderActivities() {
     inpURL.value = obj.url !== undefined ? obj.url : (obj.media && obj.media.url) || "";
     inpURL.addEventListener("input", () => {
       obj.url = inpURL.value;
-      if (ta) ta.value = JSON.stringify(obj, null, 2);
+      if (ta) {
+        const temp = { ...obj };
+        if (temp.tool === "none") delete temp.tool;
+        ta.value = JSON.stringify(temp, null, 2);
+      }
     });
     fgURL.append(lblURL, inpURL);
     body.append(fgURL);
@@ -1525,7 +1537,11 @@ function renderActivities() {
     inpMedia.addEventListener("input", () => {
       obj.media = obj.media || {};
       obj.media.type = inpMedia.value;
-      if (ta) ta.value = JSON.stringify(obj, null, 2);
+      if (ta) {
+        const temp = { ...obj };
+        if (temp.tool === "none") delete temp.tool;
+        ta.value = JSON.stringify(temp, null, 2);
+      }
     });
     fgMedia.append(lblMedia, inpMedia);
     body.append(fgMedia);
@@ -1540,7 +1556,11 @@ function renderActivities() {
     inpAction.value = obj.action || "";
     inpAction.addEventListener("input", () => {
       obj.action = inpAction.value;
-      if (ta) ta.value = JSON.stringify(obj, null, 2);
+      if (ta) {
+        const temp = { ...obj };
+        if (temp.tool === "none") delete temp.tool;
+        ta.value = JSON.stringify(temp, null, 2);
+      }
     });
     fgAction.append(lblAction, inpAction);
     body.append(fgAction);
@@ -1824,10 +1844,12 @@ function renderActivities() {
     fgRaw.className = "field-group";
     const lblRaw = document.createElement("label");
     lblRaw.textContent = "Mapping (JSON)";
+    const displayObj = { ...obj };
+    if (displayObj.tool === "none") delete displayObj.tool;
     ta = document.createElement("textarea");
     ta.style.width = "100%";
     ta.style.height = "8em";
-    ta.value = JSON.stringify(obj, null, 2);
+    ta.value = JSON.stringify(displayObj, null, 2);
     ta.addEventListener("input", () => {
       try {
         course.activities[id] = JSON.parse(ta.value);
