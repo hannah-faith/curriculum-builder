@@ -1156,7 +1156,6 @@ document.querySelectorAll("input, select, textarea").forEach((el) => {
 function renderSidebar() {
   const nav = document.getElementById("sidebar-nav");
   nav.innerHTML = "";
-  const rootUl = document.createElement("ul");
   // Icon mapping for sidebar items
   const iconMap = {
     "course-details-card": "bi bi-book",
@@ -1187,17 +1186,27 @@ function renderSidebar() {
     parent.appendChild(li);
     return li;
   };
-  // Static sections
-  addLink("course-details-card", "Course Details", rootUl);
-  addLink("rubric-card", "Rubric", rootUl);
-  addLink("section-groups-card", "Section Groups", rootUl);
-  addLink("scoring-card", "Scoring", rootUl);
-  addLink("activities-card", "Activities Mapping", rootUl);
-  // Dynamic groups/sections/steps
+
+  // Static core navigation
+  const staticContainer = document.createElement("div");
+  staticContainer.className = "static-container";
+  const staticUl = document.createElement("ul");
+  addLink("course-details-card", "Course Details", staticUl);
+  addLink("rubric-card", "Rubric", staticUl);
+  addLink("section-groups-card", "Section Groups", staticUl);
+  addLink("scoring-card", "Scoring", staticUl);
+  addLink("activities-card", "Activities Mapping", staticUl);
+  // Separator
+  const hr = document.createElement("hr");
+  staticContainer.append(staticUl, hr);
+  nav.appendChild(staticContainer);
+
+  // Dynamic section outline
+  const outlineUl = document.createElement("ul");
   course.section_groups.forEach((grp, gidx) => {
     const grpId = `group-${grp.id}`;
     const grpLabel = grp.title || `Group ${gidx + 1}`;
-    const grpLi = addLink(grpId, grpLabel, rootUl);
+    const grpLi = addLink(grpId, grpLabel, outlineUl);
     const subUl = document.createElement("ul");
     grp.sections.forEach((sec, sidx) => {
       const secId = `section-${sec.id}`;
@@ -1216,7 +1225,7 @@ function renderSidebar() {
     });
     grpLi.appendChild(subUl);
   });
-  nav.appendChild(rootUl);
+  nav.appendChild(outlineUl);
 }
 // Inject into fullRender
 const originalFull = fullRender;
@@ -1228,6 +1237,10 @@ fullRender = () => {
 const sidebar = document.getElementById("sidebar");
 const toggleBtn = document.getElementById("sidebar-toggle");
 toggleBtn.addEventListener("click", () => sidebar.classList.toggle("open"));
+// Prevent main page from scrolling when sidebar is scrolled
+document.getElementById("sidebar").addEventListener("wheel", (e) => {
+  e.stopPropagation();
+});
 // Initial build
 document.addEventListener("DOMContentLoaded", renderSidebar);
 
